@@ -72,3 +72,52 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Marquee seamless */
+.marquee {
+  display: flex;
+  gap: 0; /* on met gap via margin des logos */
+  animation: marquee 25s linear infinite;
+}
+
+.marquee-reverse {
+  animation: marquee-reverse 30s linear infinite;
+}
+
+/* Cléframes animation infinie */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); } /* translate toute la ligne pour seamless */
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* Pause on hover */
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Fade sur les côtés */
+section.relative::before,
+section.relative::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6rem;
+  pointer-events: none;
+  z-index: 10;
+}
+
+section.relative::before {
+  left: 0;
+  background: linear-gradient(to right, var(--background) 0%, transparent 100%);
+}
+
+section.relative::after {
+  right: 0;
+  background: linear-gradient(to left, var(--background) 0%, transparent 100%);
+}

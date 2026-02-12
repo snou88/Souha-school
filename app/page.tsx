@@ -5,6 +5,7 @@ import { WhyChooseUs } from "@/components/home/why-choose-us"
 import { FeaturedPrograms } from "@/components/home/featured-programs"
 import { Testimonials } from "@/components/home/testimonials"
 import { CtaBanner } from "@/components/home/cta-banner"
+import PartnersSection from "@/components/home/partners"
 
 export default function HomePage() {
   return (
@@ -16,6 +17,7 @@ export default function HomePage() {
         <FeaturedPrograms />
         <Testimonials />
         <CtaBanner />
+        <PartnersSection />
       </main>
       <Footer />
     </>

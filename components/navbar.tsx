@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, X, GraduationCap } from "lucide-react"
 import { cn } from "@/lib/utils"
+import  logo  from "../public/image/image.png"
 
 const links = [
   { href: "/", label: "Home" },
@@ -38,12 +39,12 @@ export function Navbar() {
       )}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="Apex Academy Home">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <GraduationCap className="h-5 w-5 text-primary-foreground" />
+        <Link href="/" className="flex items-center gap-2.5" aria-label="SLT Home">
+          <div className="w-50 h-10">
+            <img src={logo.src} alt="SLT Logo" className="w-full h-full" />
           </div>
           <span className="text-lg font-bold tracking-tight text-foreground">
-            Apex Academy
+            
           </span>
         </Link>
 

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useState, type FormEvent } from "react"
-import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import { useState, type FormEvent } from "react";
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 const contactInfo = [
   {
@@ -28,46 +28,46 @@ const contactInfo = [
     title: "Office Hours",
     lines: ["Mon - Fri: 9:00 AM - 6:00 PM", "Sat: 10:00 AM - 2:00 PM"],
   },
-]
+];
 
 interface FormErrors {
-  name?: string
-  email?: string
-  subject?: string
-  message?: string
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
 }
 
 export function ContactContent() {
-  const [submitted, setSubmitted] = useState(false)
-  const [errors, setErrors] = useState<FormErrors>({})
+  const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
-  })
+  });
 
-  useScrollAnimation()
+  useScrollAnimation();
 
   function validate(): FormErrors {
-    const e: FormErrors = {}
-    if (!formData.name.trim()) e.name = "Full name is required."
-    if (!formData.email.trim()) e.email = "Email address is required."
+    const e: FormErrors = {};
+    if (!formData.name.trim()) e.name = "Full name is required.";
+    if (!formData.email.trim()) e.email = "Email address is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      e.email = "Please enter a valid email address."
-    if (!formData.subject.trim()) e.subject = "Subject is required."
-    if (!formData.message.trim()) e.message = "Message is required."
+      e.email = "Please enter a valid email address.";
+    if (!formData.subject.trim()) e.subject = "Subject is required.";
+    if (!formData.message.trim()) e.message = "Message is required.";
     else if (formData.message.trim().length < 10)
-      e.message = "Message must be at least 10 characters."
-    return e
+      e.message = "Message must be at least 10 characters.";
+    return e;
   }
 
   function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    const validationErrors = validate()
-    setErrors(validationErrors)
+    e.preventDefault();
+    const validationErrors = validate();
+    setErrors(validationErrors);
     if (Object.keys(validationErrors).length === 0) {
-      setSubmitted(true)
+      setSubmitted(true);
     }
   }
 
@@ -83,7 +83,8 @@ export function ContactContent() {
             We&apos;d Love to Hear From You
           </h1>
           <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Have questions about our programs? Our team is ready to help you take the next step.
+            Have questions about our programs? Our team is ready to help you
+            take the next step.
           </p>
         </div>
 
@@ -101,7 +102,9 @@ export function ContactContent() {
                     <item.icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-foreground">{item.title}</h3>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {item.title}
+                    </h3>
                     {item.lines.map((line) =>
                       item.href ? (
                         <a
@@ -115,7 +118,7 @@ export function ContactContent() {
                         <p key={line} className="text-sm text-muted-foreground">
                           {line}
                         </p>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
@@ -131,14 +134,22 @@ export function ContactContent() {
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                   </div>
-                  <h3 className="mt-6 text-xl font-bold text-foreground">Message Sent!</h3>
+                  <h3 className="mt-6 text-xl font-bold text-foreground">
+                    Message Sent!
+                  </h3>
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                    Thank you for reaching out. We typically respond within 24 hours during business days.
+                    Thank you for reaching out. We typically respond within 24
+                    hours during business days.
                   </p>
                   <button
                     onClick={() => {
-                      setSubmitted(false)
-                      setFormData({ name: "", email: "", subject: "", message: "" })
+                      setSubmitted(false);
+                      setFormData({
+                        name: "",
+                        email: "",
+                        subject: "",
+                        message: "",
+                      });
                     }}
                     className="mt-6 text-sm font-semibold text-primary hover:text-primary/80"
                   >
@@ -146,78 +157,118 @@ export function ContactContent() {
                   </button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+                <form
+                  onSubmit={handleSubmit}
+                  noValidate
+                  className="flex flex-col gap-6"
+                >
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">
+                      <label
+                        htmlFor="name"
+                        className="mb-1.5 block text-sm font-medium text-foreground"
+                      >
                         Full Name
                       </label>
                       <input
                         id="name"
                         type="text"
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                         className={cn(
                           "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
-                          errors.name ? "border-destructive" : "border-border"
+                          errors.name ? "border-destructive" : "border-border",
                         )}
                         placeholder="John Doe"
                       />
-                      {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
+                      {errors.name && (
+                        <p className="mt-1 text-xs text-destructive">
+                          {errors.name}
+                        </p>
+                      )}
                     </div>
                     <div>
-                      <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
+                      <label
+                        htmlFor="email"
+                        className="mb-1.5 block text-sm font-medium text-foreground"
+                      >
                         Email Address
                       </label>
                       <input
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
                         className={cn(
                           "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
-                          errors.email ? "border-destructive" : "border-border"
+                          errors.email ? "border-destructive" : "border-border",
                         )}
                         placeholder="john@example.com"
                       />
-                      {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+                      {errors.email && (
+                        <p className="mt-1 text-xs text-destructive">
+                          {errors.email}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="mb-1.5 block text-sm font-medium text-foreground">
+                    <label
+                      htmlFor="subject"
+                      className="mb-1.5 block text-sm font-medium text-foreground"
+                    >
                       Subject
                     </label>
                     <input
                       id="subject"
                       type="text"
                       value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, subject: e.target.value })
+                      }
                       className={cn(
                         "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
-                        errors.subject ? "border-destructive" : "border-border"
+                        errors.subject ? "border-destructive" : "border-border",
                       )}
                       placeholder="Inquiry about Web Development program"
                     />
-                    {errors.subject && <p className="mt-1 text-xs text-destructive">{errors.subject}</p>}
+                    {errors.subject && (
+                      <p className="mt-1 text-xs text-destructive">
+                        {errors.subject}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="mb-1.5 block text-sm font-medium text-foreground">
+                    <label
+                      htmlFor="message"
+                      className="mb-1.5 block text-sm font-medium text-foreground"
+                    >
                       Message
                     </label>
                     <textarea
                       id="message"
                       rows={5}
                       value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, message: e.target.value })
+                      }
                       className={cn(
                         "w-full resize-none rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
-                        errors.message ? "border-destructive" : "border-border"
+                        errors.message ? "border-destructive" : "border-border",
                       )}
                       placeholder="Tell us how we can help you..."
                     />
-                    {errors.message && <p className="mt-1 text-xs text-destructive">{errors.message}</p>}
+                    {errors.message && (
+                      <p className="mt-1 text-xs text-destructive">
+                        {errors.message}
+                      </p>
+                    )}
                   </div>
 
                   <button
@@ -233,26 +284,19 @@ export function ContactContent() {
           </div>
         </div>
 
-        {/* Map placeholder */}
-        <div className="mt-16 animate-on-scroll overflow-hidden rounded-xl border border-border shadow-sm">
-          <div className="flex h-80 items-center justify-center bg-secondary">
-            <div className="text-center">
-              <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
-              <p className="mt-3 text-sm font-medium text-muted-foreground">
-                123 Education Blvd, Suite 400, New York, NY 10001
-              </p>
-              <a
-                href="https://maps.google.com/?q=New+York+NY+10001"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-block text-sm font-semibold text-primary hover:text-primary/80"
-              >
-                Open in Google Maps
-              </a>
-            </div>
-          </div>
+        {/* Map avec Google Maps iframe */}
+        <div className="mt-16 overflow-hidden rounded-xl border border-border shadow-sm">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d199.80899930554358!2d2.9866106!3d36.7479155!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2sdz!4v1770926620568!5m2!1sfr!2sdz"
+            width="100%"
+            height="450"
+            style={{ border: 0 }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="w-full h-80"
+          ></iframe>
         </div>
       </div>
     </div>
-  )
+  );
 }

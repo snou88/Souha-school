@@ -1,5 +1,7 @@
-import Link from "next/link"
-import { GraduationCap, Mail, Phone, MapPin } from "lucide-react"
+import Link from "next/link";
+import { GraduationCap, Mail, Phone, MapPin } from "lucide-react";
+import logo from "../public/image/image_w.png";
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -7,7 +9,7 @@ const quickLinks = [
   { href: "/about", label: "About Us" },
   { href: "/contact", label: "Contact" },
   { href: "/inscription", label: "Enroll Now" },
-]
+];
 
 const programs = [
   "Web Development",
@@ -15,7 +17,7 @@ const programs = [
   "Digital Marketing",
   "UX/UI Design",
   "Cybersecurity",
-]
+];
 
 export function Footer() {
   return (
@@ -24,15 +26,19 @@ export function Footer() {
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2.5" aria-label="Apex Academy Home">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
+            <Link
+              href="/"
+              className="flex items-center gap-2.5"
+              aria-label="SLT Home"
+            >
+              <div className="w-50 h-20">
+                <img src={logo.src} alt="SLT Logo" className="w-full h-full" />
               </div>
-              <span className="text-lg font-bold tracking-tight">Apex Academy</span>
+              <span className="text-lg font-bold tracking-tight text-foreground"></span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-background/60">
-              Empowering professionals with industry-leading training programs since 2015.
-              Your future starts here.
+              Empowering professionals with industry-leading training programs
+              since 2015. Your future starts here.
             </p>
           </div>
 
@@ -113,22 +119,62 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-background/10 pt-8 md:flex-row">
           <p className="text-xs text-background/40">
-            {new Date().getFullYear()} Apex Academy. All rights reserved.
+            {new Date().getFullYear()}{" "}
+            <a href="https://snouportfolio.vercel.app/">
+              Created by Ahmed senouci
+            </a>
           </p>
-          <div className="flex items-center gap-4">
-            {["Facebook", "Twitter", "LinkedIn", "Instagram"].map((social) => (
-              <a
-                key={social}
-                href="#"
-                className="text-xs text-background/40 transition-colors hover:text-background"
-                aria-label={`Visit our ${social} page`}
-              >
-                {social}
+          {/* Bottom bar */}
+          <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-background/10 pt-8 md:flex-row">
+            <p className="text-xs text-background/40">
+              {new Date().getFullYear()}{" "}
+              <a href="https://snouportfolio.vercel.app/">
+                Created by Ahmed Senouci
               </a>
-            ))}
+            </p>
+
+            {/* Réseaux sociaux avec icônes */}
+            <div className="flex items-center gap-4">
+              <a
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-600"
+                aria-label="Visit our Facebook page"
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://www.twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-400"
+                aria-label="Visit our Twitter page"
+              >
+                <FaTwitter />
+              </a>
+              <a
+                href="https://www.linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-700"
+                aria-label="Visit our LinkedIn page"
+              >
+                <FaLinkedinIn />
+              </a>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-pink-500"
+                aria-label="Visit our Instagram page"
+              >
+                <FaInstagram />
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </footer>
-  )
+  );
 }

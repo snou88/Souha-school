@@ -30,7 +30,7 @@ export function HeroSection() {
 
             <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground animate-fade-in-up [animation-delay:200ms]">
               Gain in-demand skills through hands-on programs designed by industry experts. 
-              Join thousands of graduates who transformed their careers at Apex Academy.
+              Join thousands of graduates who transformed their careers at SLT Academy.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-4 animate-fade-in-up [animation-delay:300ms]">

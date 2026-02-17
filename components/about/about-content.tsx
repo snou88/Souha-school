@@ -162,52 +162,6 @@ export function AboutContent() {
             </div>
           </div>
         </div>
-
-        {/* Team */}
-        <div className="mt-24">
-          <div className="mx-auto max-w-2xl text-center animate-on-scroll">
-            <span className="text-sm font-semibold uppercase tracking-wider text-primary">
-              Leadership
-            </span>
-            <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Meet Our Team
-            </h2>
-            <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-              Experienced professionals dedicated to your success.
-            </p>
-          </div>
-          <div className="stagger-children mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {team.map((member) => (
-              <div
-                key={member.name}
-                className="animate-on-scroll group rounded-xl border border-border bg-card p-6 text-center shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
-              >
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
-                  {member.initials}
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-foreground">{member.name}</h3>
-                <p className="text-sm font-medium text-primary">{member.role}</p>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{member.bio}</p>
-                <div className="mt-4 flex items-center justify-center gap-3">
-                  <a
-                    href="#"
-                    className="text-muted-foreground transition-colors hover:text-primary"
-                    aria-label={`${member.name} LinkedIn`}
-                  >
-                    <Linkedin className="h-4 w-4" />
-                  </a>
-                  <a
-                    href="#"
-                    className="text-muted-foreground transition-colors hover:text-primary"
-                    aria-label={`${member.name} Twitter`}
-                  >
-                    <Twitter className="h-4 w-4" />
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   )

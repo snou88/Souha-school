@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { GraduationCap, Mail, Phone, MapPin } from "lucide-react";
+import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope } from "react-icons/fa";
 import logo from "../public/image/image_w.png";
-import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaLinkedinIn,
+  FaInstagram,
+  FaTiktok,
+} from "react-icons/fa";
 
 const quickLinks = [
   { href: "/", label: "Home" },
@@ -21,7 +27,7 @@ const programs = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-foreground text-background">
+    <footer className="border-t border-border bg-primary text-background">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
@@ -36,10 +42,53 @@ export function Footer() {
               </div>
               <span className="text-lg font-bold tracking-tight text-foreground"></span>
             </Link>
-            <p className="mt-4 text-sm leading-relaxed text-background/60">
+            <p className="mt-4 text-sm leading-relaxed text-background/60 justify-center">
               Empowering professionals with industry-leading training programs
               since 2015. Your future starts here.
             </p>
+            {/* Réseaux sociaux avec icônes */}
+            <div className="flex items-center gap-4 mt-5 justify-center md:mr-8">
+              <a
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-600"
+                aria-label="Visit our Facebook page"
+                style={{ fontSize: "2rem" }}
+              >
+                <FaFacebookF />
+              </a>
+              <a
+                href="https://www.tiktok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-pink-500"
+                aria-label="Visit our TikTok page"
+                style={{ fontSize: "2rem" }} 
+              >
+                <FaTiktok />
+              </a>
+              <a
+                href="https://www.linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-700"
+                aria-label="Visit our LinkedIn page"
+                style={{ fontSize: "2rem" }}
+              >
+                <FaLinkedinIn />
+              </a>
+              <a
+                href="https://www.instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white text-lg transition-transform hover:scale-110 hover:text-pink-500"
+                aria-label="Visit our Instagram page"
+                style={{ fontSize: "2rem" }}
+              >
+                <FaInstagram />
+              </a>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -85,93 +134,51 @@ export function Footer() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-background/40">
               Contact
             </h3>
+
             <ul className="mt-4 flex flex-col gap-4">
+              {/* Adresse */}
               <li className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-background/40" />
+                <FaMapMarkerAlt className="mt-1 text-lg text-white transition-transform hover:scale-110 hover:text-blue-500" />
                 <span className="text-sm text-background/70">
-                  123 Education Blvd, Suite 400
+                  STL Academy Headquarters
                   <br />
-                  New York, NY 10001
+                  Algerie, Cheraga
                 </span>
               </li>
+
+              {/* Téléphone */}
               <li className="flex items-center gap-3">
-                <Phone className="h-4 w-4 shrink-0 text-background/40" />
+                <FaPhoneAlt className="text-lg text-white transition-transform hover:scale-110 hover:text-green-500" />
                 <a
-                  href="tel:+12125551234"
+                  href="tel:+213540432265"
                   className="text-sm text-background/70 transition-colors hover:text-background"
                 >
-                  +1 (212) 555-1234
+                  +213 540 43 22 65
                 </a>
               </li>
+
+              {/* Email */}
               <li className="flex items-center gap-3">
-                <Mail className="h-4 w-4 shrink-0 text-background/40" />
+                <FaEnvelope className="text-lg text-white transition-transform hover:scale-110 hover:text-red-500" />
                 <a
-                  href="mailto:info@apexacademy.com"
+                  href="mailto:info@stl-academy.com"
                   className="text-sm text-background/70 transition-colors hover:text-background"
                 >
-                  info@apexacademy.com
+                  info@stl-academy.com
                 </a>
               </li>
             </ul>
           </div>
         </div>
-
-        {/* Bottom bar */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-background/10 pt-8 md:flex-row">
-          <p className="text-xs text-background/40">
-            {new Date().getFullYear()}{" "}
-            <a href="https://snouportfolio.vercel.app/">
-              Created by Ahmed senouci
-            </a>
-          </p>
           {/* Bottom bar */}
-          <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-background/10 pt-8 md:flex-row">
+          <div className="flex flex-col items-center justify-between gap-4  border-background/10  md:flex-row">
             <p className="text-xs text-background/40">
               {new Date().getFullYear()}{" "}
               <a href="https://snouportfolio.vercel.app/">
                 Created by Ahmed Senouci
               </a>
             </p>
-
-            {/* Réseaux sociaux avec icônes */}
-            <div className="flex items-center gap-4">
-              <a
-                href="https://www.facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-600"
-                aria-label="Visit our Facebook page"
-              >
-                <FaFacebookF />
-              </a>
-              <a
-                href="https://www.twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-400"
-                aria-label="Visit our Twitter page"
-              >
-                <FaTwitter />
-              </a>
-              <a
-                href="https://www.linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-700"
-                aria-label="Visit our LinkedIn page"
-              >
-                <FaLinkedinIn />
-              </a>
-              <a
-                href="https://www.instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white text-lg transition-transform hover:scale-110 hover:text-pink-500"
-                aria-label="Visit our Instagram page"
-              >
-                <FaInstagram />
-              </a>
-            </div>
           </div>
         </div>
       </div>

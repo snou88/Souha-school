@@ -6,7 +6,7 @@ import { InscriptionForm } from "@/components/inscription/inscription-form"
 export const metadata: Metadata = {
   title: "Enroll",
   description:
-    "Apply to Apex Academy. Complete your enrollment in minutes and start your professional training journey.",
+    "Apply to SLT Academy. Complete your enrollment in minutes and start your professional training journey.",
 }
 
 export default function InscriptionPage() {

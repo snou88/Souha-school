@@ -9,11 +9,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Apex Academy | Professional Training School",
-    template: "%s | Apex Academy",
+    default: "SLT Academy | Professional Training School",
+    template: "%s | SLT Academy",
   },
   description:
-    "Build your future with professional training programs. Apex Academy offers industry-leading courses designed to accelerate your career.",
+    "Build your future with professional training programs. SLT Academy offers industry-leading courses designed to accelerate your career.",
 }
 
 export const viewport: Viewport = {

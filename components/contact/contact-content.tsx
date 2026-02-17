@@ -287,7 +287,7 @@ export function ContactContent() {
         {/* Map avec Google Maps iframe */}
         <div className="mt-16 overflow-hidden rounded-xl border border-border shadow-sm">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d199.80899930554358!2d2.9866106!3d36.7479155!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sfr!2sdz!4v1770926620568!5m2!1sfr!2sdz"
+            src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d199.80932610909935!2d2.9864058231843993!3d36.74778999494874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzbCsDQ0JzUyLjEiTiAywrA1OScxMS44IkU!5e0!3m2!1sfr!2sdz!4v1770982457442!5m2!1sfr!2sdz"
             width="100%"
             height="450"
             style={{ border: 0 }}

@@ -5,8 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma, isValidEmail } from '@/lib/db'
-import { hashPassword, requireAuth } from '@/lib/auth'
-import { handleApiError, corsHeaders } from '@/lib/api-middleware'
+import { hashPassword } from '@/lib/auth'
+import { requireAuth, handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function POST(req: NextRequest) {
   try {

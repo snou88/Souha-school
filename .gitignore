@@ -8,3 +8,58 @@ node_modules/
 .next/
 .env*.local
 .DS_Store
+
+# Environment variables - CRITICAL: Keep secrets out of git
+.env
+.env.local
+.env.development.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+prisma/dev.db
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# Build output
+dist/
+build/
+.turbo/
+coverage/
+
+# Testing
+.nyc_output/
+*.lcov
+
+# OS files
+Thumbs.db
+
+# Backups and temp files
+*.bak
+*.backup
+backups/
+tmp/
+.tmp/
+
+# Vercel
+.vercel/
+
+# Supabase
+supabase/migrations/

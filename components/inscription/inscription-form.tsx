@@ -89,6 +89,7 @@ function validateStep(step: number, data: FormData): FormErrors {
   if (step === 3) {
     if (!data.selectedProgram) errors.selectedProgram = "Please select a program."
     if (!data.startDate) errors.startDate = "Preferred start date is required."
+    // Suppression de la validation agreeTerms
   }
 
   return errors
@@ -515,6 +516,8 @@ export function InscriptionForm() {
                       </select>
                       {errors.startDate && <p className="mt-1 text-xs text-destructive">{errors.startDate}</p>}
                     </div>
+
+                    {/* Case à cocher supprimée comme demandé */}
                   </div>
                 )}
 

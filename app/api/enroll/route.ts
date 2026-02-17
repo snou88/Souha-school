@@ -29,6 +29,7 @@ interface EnrollmentPayload {
 export async function POST(req: NextRequest) {
   try {
     const payload: EnrollmentPayload = await req.json()
+    console.log('ENROLL PAYLOAD', JSON.stringify(payload, null, 2))
 
     // Basic required fields (program and dates)
     if (!payload.accountType || !payload.selectedProgram || !payload.startDate) {
@@ -222,6 +223,9 @@ export async function POST(req: NextRequest) {
     )
   } catch (error) {
     console.error('Enrollment error:', error)
+    if (error instanceof Error) {
+      return NextResponse.json({ success: false, message: error.message }, { status: 500, headers: corsHeaders() })
+    }
     return handleApiError(error)
   }
 }

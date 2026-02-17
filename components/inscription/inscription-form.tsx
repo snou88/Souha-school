@@ -89,6 +89,7 @@ function validateStep(step: number, data: FormData): FormErrors {
   if (step === 3) {
     if (!data.selectedProgram) errors.selectedProgram = "Please select a program."
     if (!data.startDate) errors.startDate = "Preferred start date is required."
+    if (!data.agreeTerms) errors.agreeTerms = "You must agree to the terms and conditions."
   }
 
   return errors
@@ -515,6 +516,20 @@ export function InscriptionForm() {
                       </select>
                       {errors.startDate && <p className="mt-1 text-xs text-destructive">{errors.startDate}</p>}
                     </div>
+
+                    <div className="flex items-start gap-3">
+                      <input
+                        id="agreeTerms"
+                        type="checkbox"
+                        checked={formData.agreeTerms}
+                        onChange={(e) => update("agreeTerms", e.target.checked)}
+                        className="mt-1 h-4 w-4"
+                      />
+                      <label htmlFor="agreeTerms" className="text-sm text-foreground">
+                        I agree to the terms and conditions
+                      </label>
+                    </div>
+                    {errors.agreeTerms && <p className="mt-1 text-xs text-destructive">{errors.agreeTerms}</p>}
                   </div>
                 )}
 

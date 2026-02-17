@@ -30,14 +30,15 @@ export async function POST(req: NextRequest) {
   try {
     const payload: EnrollmentPayload = await req.json()
 
-    // Validate required fields
-    if (!payload.accountType || !payload.email || !payload.phone || !payload.selectedProgram || !payload.startDate) {
+    // Basic required fields (program and dates)
+    if (!payload.accountType || !payload.selectedProgram || !payload.startDate) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
         { status: 400, headers: corsHeaders() }
       )
     }
 
+    // Must accept terms
     if (!payload.agreeTerms) {
       return NextResponse.json(
         { success: false, message: 'Must agree to terms and conditions' },
@@ -45,19 +46,53 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Validate email and phone
-    if (!isValidEmail(payload.email)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid email format' },
-        { status: 400, headers: corsHeaders() }
-      )
-    }
+    // Validate contact fields depending on account type
+    if (payload.accountType === 'Individual') {
+      if (!payload.email || !payload.phone) {
+        return NextResponse.json(
+          { success: false, message: 'Missing required contact fields for individual' },
+          { status: 400, headers: corsHeaders() }
+        )
+      }
 
-    if (!isValidPhone(payload.phone)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid phone format' },
-        { status: 400, headers: corsHeaders() }
-      )
+      if (!isValidEmail(payload.email)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid email format' },
+          { status: 400, headers: corsHeaders() }
+        )
+      }
+
+      if (!isValidPhone(payload.phone)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid phone format' },
+          { status: 400, headers: corsHeaders() }
+        )
+      }
+    } else {
+      // Company: accept either company contact email/phone or fallback to top-level email/phone
+      const contactEmail = payload.companyContactEmail || payload.email
+      const contactPhone = payload.companyPhone || payload.phone
+
+      if (!contactEmail || !contactPhone) {
+        return NextResponse.json(
+          { success: false, message: 'Missing required contact fields for company' },
+          { status: 400, headers: corsHeaders() }
+        )
+      }
+
+      if (!isValidEmail(contactEmail)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid contact email format' },
+          { status: 400, headers: corsHeaders() }
+        )
+      }
+
+      if (!isValidPhone(contactPhone)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid contact phone format' },
+          { status: 400, headers: corsHeaders() }
+        )
+      }
     }
 
     // Find formation

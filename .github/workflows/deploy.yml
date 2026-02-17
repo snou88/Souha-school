@@ -12,14 +12,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Deploy to Vercel
-        uses: vercel/action@main
+        uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          production: true
+          working-directory: .
+          prod: true
         env:
-          # These should be set as Vercel environment variables
+          # Provide environment variables to Vercel via its action (also set them in Vercel dashboard)
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

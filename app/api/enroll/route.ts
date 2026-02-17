@@ -1,3 +1,61 @@
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { createSupabaseServerClient } from '@/lib/supabase'
+import { ensureMigrations } from '@/lib/migrations'
+
+/**
+ * POST /api/enroll
+ * Body: { formationId: number }
+ * Auth: expects Authorization: Bearer <access_token> header (or modify to read cookies)
+ */
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const formationId = body?.formationId
+    if (!formationId) {
+      return NextResponse.json({ error: 'formationId is required' }, { status: 400 })
+    }
+
+    // Extract access token from Authorization header
+    const authHeader = req.headers.get('authorization') || ''
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null
+    if (!token) {
+      return NextResponse.json({ error: 'Missing Authorization token' }, { status: 401 })
+    }
+
+    // Ensure DB objects and policies exist (no-op if already created)
+    await ensureMigrations()
+
+    // Use service role to verify token and perform the insert (service role bypasses RLS).
+    // Important: Because service role bypasses RLS, we verify the token and enforce student_id === user.id in code.
+    const supabase = createSupabaseServerClient()
+
+    // Verify token and get user
+    const { data: userData, error: userError } = await supabase.auth.getUser(token)
+    if (userError || !userData?.user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+    const userId = userData.user.id
+
+    // TODO: check formation capacity, existing enrollment, payment, etc.
+
+    const { data, error } = await supabase
+      .from('enrollments')
+      .insert([{ formation_id: formationId, student_id: userId, status: 'pending' }])
+      .select('*')
+      .single()
+
+    if (error) {
+      console.error('enroll insert error', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, enrollment: data })
+  } catch (err: any) {
+    console.error('enroll route error', err)
+    return NextResponse.json({ error: err?.message ?? 'Unknown error' }, { status: 500 })
+  }
+}
 /**
  * POST /api/enroll
  * Create new enrollment/inscription (public endpoint, no auth required)

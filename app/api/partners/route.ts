@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { supabase } from '@/lib/db'
 import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function GET(req: NextRequest) {
@@ -12,12 +12,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const featured = searchParams.get('featured') === 'true'
 
-    const where = featured ? { featured: true } : {}
+    let query = supabase.from('partners').select('*')
 
-    const partners = await prisma.partner.findMany({
-      where,
-      orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
-    })
+    if (featured) {
+      query = query.eq('featured', true)
+    }
+
+    const { data: partners, error } = await query.order('created_at', { ascending: false })
+
+    if (error) throw error
 
     return NextResponse.json(
       {
@@ -43,9 +46,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if name exists
-    const existing = await prisma.partner.findUnique({
-      where: { name },
-    })
+    const { data: existing } = await supabase
+      .from('partners')
+      .select('id')
+      .eq('name', name)
+      .maybeSingle()
 
     if (existing) {
       return NextResponse.json(
@@ -54,14 +59,19 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const partner = await prisma.partner.create({
-      data: {
-        name: name.trim(),
-        website: website?.trim(),
-        logoUrl,
-        featured: featured || false,
-      },
-    })
+    const { data: partner, error } = await supabase
+      .from('partners')
+      .insert([
+        {
+          name: name.trim(),
+          website: website?.trim(),
+          logo_url: logoUrl,
+        },
+      ])
+      .select()
+      .maybeSingle()
+
+    if (error) throw error
 
     return NextResponse.json(
       {

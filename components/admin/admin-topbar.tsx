@@ -72,7 +72,7 @@ export function AdminTopbar({ collapsed, onMobileToggle }: AdminTopbarProps) {
 
         {/* Profile */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild suppressHydrationWarning>
             <button className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors hover:bg-secondary">
               <Avatar className="h-8 w-8">
                 <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">

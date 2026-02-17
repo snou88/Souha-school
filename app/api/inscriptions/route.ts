@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { supabase } from '@/lib/db'
 import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function GET(req: NextRequest) {
@@ -14,33 +14,41 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get('type')
     const formation = searchParams.get('formation')
 
-    const where: any = {}
-    if (status) where.status = status
-    if (type) where.type = type
-    if (formation) where.formationId = formation
+    let query = supabase.from('inscriptions').select('*')
 
-    const inscriptions = await prisma.inscription.findMany({
-      where,
-      include: {
-        student: {
-          select: {
-            id: true,
-            email: true,
-            type: true,
-            formationId: true,
-          },
-        },
-        formation: { select: { id: true, name: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
+    if (status) query = query.eq('status', status)
+    if (type) query = query.eq('type', type)
+    if (formation) query = query.eq('formation_id', formation)
+
+    const { data: inscriptions, error } = await query.order('created_at', { ascending: false })
+
+    if (error) throw error
 
     // Count stats
+    const { count: totalCount } = await supabase
+      .from('inscriptions')
+      .select('*', { count: 'exact', head: true })
+
+    const { count: pendingCount } = await supabase
+      .from('inscriptions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'Pending')
+
+    const { count: approvedCount } = await supabase
+      .from('inscriptions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'Approved')
+
+    const { count: rejectedCount } = await supabase
+      .from('inscriptions')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'Rejected')
+
     const stats = {
-      total: await prisma.inscription.count(),
-      pending: await prisma.inscription.count({ where: { status: 'Pending' } }),
-      approved: await prisma.inscription.count({ where: { status: 'Approved' } }),
-      rejected: await prisma.inscription.count({ where: { status: 'Rejected' } }),
+      total: totalCount || 0,
+      pending: pendingCount || 0,
+      approved: approvedCount || 0,
+      rejected: rejectedCount || 0,
     }
 
     return NextResponse.json(

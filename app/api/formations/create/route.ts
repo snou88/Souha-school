@@ -1,17 +1,14 @@
 /**
  * POST /api/formations
- * Create a new formation (admin only)
+ * Create a new formation
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { requireAuth, handleApiError, corsHeaders } from '@/lib/api-middleware'
+import { supabase } from '@/lib/db'
+import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function POST(req: NextRequest) {
   try {
-    // Require admin authentication
-    const adminId = requireAuth(req)
-
     const { name, description, category, duration, status } = await req.json()
 
     // Validate input
@@ -26,9 +23,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if name already exists
-    const existing = await prisma.formation.findUnique({
-      where: { name: name.trim() },
-    })
+    const { data: existing } = await supabase
+      .from('formations')
+      .select('id')
+      .eq('name', name.trim())
+      .limit(1)
+      .maybeSingle()
 
     if (existing) {
       return NextResponse.json(
@@ -38,15 +38,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Create formation
-    const formation = await prisma.formation.create({
-      data: {
-        name: name.trim(),
-        description: description.trim(),
-        category: category.trim(),
-        duration: duration.trim(),
-        status: status || 'Draft',
-      },
-    })
+    const { data: formation, error } = await supabase
+      .from('formations')
+      .insert([
+        {
+          name: name.trim(),
+          description: description.trim(),
+          category: category.trim(),
+          duration: duration.trim(),
+          status: status || 'Draft',
+        },
+      ])
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json(
       {

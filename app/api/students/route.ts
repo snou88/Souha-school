@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { supabase } from '@/lib/db'
 import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function GET(req: NextRequest) {
@@ -14,19 +14,15 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status')
     const formation = searchParams.get('formation')
 
-    const where: any = {}
-    if (type) where.type = type
-    if (status) where.status = status
-    if (formation) where.formationId = formation
+    let query = supabase.from('students').select('*')
 
-    const students = await prisma.student.findMany({
-      where,
-      include: {
-        formation: { select: { id: true, name: true } },
-        inscriptions: { select: { id: true, status: true } },
-      },
-      orderBy: { enrolledDate: 'desc' },
-    })
+    if (type) query = query.eq('type', type)
+    if (status) query = query.eq('status', status)
+    if (formation) query = query.eq('formation_id', formation)
+
+    const { data: students, error } = await query.order('enrolled_date', { ascending: false })
+
+    if (error) throw error
 
     return NextResponse.json(
       {

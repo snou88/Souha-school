@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { supabase } from '@/lib/db'
 import { verifyPassword, generateToken } from '@/lib/auth'
 import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
@@ -21,11 +21,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Find admin
-    const admin = await prisma.admin.findUnique({
-      where: { email: email.toLowerCase() },
-    })
+    const { data: admin, error } = await supabase
+      .from('admin')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .maybeSingle()
 
-    if (!admin) {
+    if (error || !admin) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401, headers: corsHeaders() }
@@ -33,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify password
-    const passwordValid = await verifyPassword(password, admin.password)
+    const passwordValid = await verifyPassword(password, admin.password_hash)
     if (!passwordValid) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },

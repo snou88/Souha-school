@@ -33,6 +33,6 @@ export function createSupabaseServerClient(): SupabaseClient {
  * - Browser (client components): Always use createBrowserClient() in 'use client' components
  * - Server (API routes, server actions): Use createServerClient()
  */
-J// NOTE: Keep this module safe to import from client components.
+// NOTE: Keep this module safe to import from client components.
 // Export only simple factory functions that do not import server-only modules like `next/headers`.
 

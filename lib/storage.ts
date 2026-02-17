@@ -3,7 +3,7 @@
  * Handles file uploads, signed URLs, and bucket management
  */
 
-import { createAdminSupabaseClient } from '@/lib/supabase'
+import { supabase } from '@/lib/db'
 
 const PARTNER_LOGOS_BUCKET = process.env.NEXT_PUBLIC_PARTNER_LOGOS_BUCKET || 'partner-logos'
 const STUDENT_DOCUMENTS_BUCKET = process.env.NEXT_PUBLIC_STUDENT_DOCUMENTS_BUCKET || 'student-documents'
@@ -20,8 +20,6 @@ export async function generateUploadUrl(
   expiresIn: number = 3600
 ): Promise<{ url: string; token: string }> {
   try {
-    const supabase = createAdminSupabaseClient()
-    
     // Generate signed upload URL
     const { data, error } = await supabase.storage
       .from(bucketName)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { supabase } from '@/lib/db'
 import { isValidEmail, isValidPhone, sanitizeInput } from '@/lib/db'
 import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
@@ -83,9 +83,11 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Find formation
-		const formation = await prisma.formation.findUnique({
-			where: { name: payload.selectedProgram },
-		})
+		const { data: formation } = await supabase
+			.from('formations')
+			.select('*')
+			.eq('name', payload.selectedProgram)
+			.single()
 
 		if (!formation) {
 			return NextResponse.json(
@@ -127,12 +129,12 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if email already enrolled in this formation
-		const existingStudent = await prisma.student.findFirst({
-			where: {
-				email: payload.email.toLowerCase(),
-				formationId: formation.id,
-			},
-		})
+		const { data: existingStudent } = await supabase
+			.from('students')
+			.select('*')
+			.eq('email', payload.email.toLowerCase())
+			.eq('formationId', formation.id)
+			.single()
 
 		if (existingStudent) {
 			return NextResponse.json(
@@ -145,53 +147,68 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Create or update student
-		let student = await prisma.student.findUnique({
-			where: { email: payload.email.toLowerCase() },
-		})
+		const { data: existingStudentData } = await supabase
+			.from('students')
+			.select('*')
+			.eq('email', payload.email.toLowerCase())
+			.single()
 
+		let student = existingStudentData
 		if (student) {
 			// Update existing student
-			student = await prisma.student.update({
-				where: { id: student.id },
-				data: {
+			const { data: updatedStudent } = await supabase
+				.from('students')
+				.update({
 					formationId: formation.id,
 					status: 'Active',
-				},
-			})
+				})
+				.eq('id', student.id)
+				.select()
+				.single()
+			student = updatedStudent
 		} else {
 			// Create new student
-			student = await prisma.student.create({
-				data: {
-					type: payload.accountType,
-					email: payload.email.toLowerCase(),
-					phone: sanitizeInput(payload.phone),
-					firstName: payload.firstName ? sanitizeInput(payload.firstName) : null,
-					lastName: payload.lastName ? sanitizeInput(payload.lastName) : null,
-					dateOfBirth: payload.dateOfBirth ? new Date(payload.dateOfBirth) : null,
-					companyName: payload.companyName ? sanitizeInput(payload.companyName) : null,
-					companyStudentCount: payload.companyStudentCount ? parseInt(payload.companyStudentCount) : null,
-					formationId: formation.id,
-					status: 'Active',
-				},
-			})
+			const { data: newStudent } = await supabase
+				.from('students')
+				.insert([
+					{
+						type: payload.accountType,
+						email: payload.email.toLowerCase(),
+						phone: sanitizeInput(payload.phone),
+						firstName: payload.firstName ? sanitizeInput(payload.firstName) : null,
+						lastName: payload.lastName ? sanitizeInput(payload.lastName) : null,
+						dateOfBirth: payload.dateOfBirth ? payload.dateOfBirth : null,
+						companyName: payload.companyName ? sanitizeInput(payload.companyName) : null,
+						companyStudentCount: payload.companyStudentCount ? parseInt(payload.companyStudentCount) : null,
+						formationId: formation.id,
+						status: 'Active',
+					},
+				])
+				.select()
+				.single()
+			student = newStudent
 		}
 
 		// Create inscription (enrollment request)
-		const inscription = await prisma.inscription.create({
-			data: {
-				studentId: student.id,
-				formationId: formation.id,
-				type: payload.accountType,
-				requestorName: studentName,
-				requestorEmail: requestorEmail.toLowerCase(),
-				requestorPhone: sanitizeInput(payload.phone),
-				startDate: new Date(payload.startDate),
-				numberOfStudents: payload.accountType === 'Company' 
-					? parseInt(payload.companyStudentCount || '1') 
-					: 1,
-				status: 'Pending',
-			},
-		})
+		const { data: inscription } = await supabase
+			.from('inscriptions')
+			.insert([
+				{
+					studentId: student.id,
+					formationId: formation.id,
+					type: payload.accountType,
+					requestorName: studentName,
+					requestorEmail: requestorEmail.toLowerCase(),
+					requestorPhone: sanitizeInput(payload.phone),
+					startDate: payload.startDate,
+					numberOfStudents: payload.accountType === 'Company' 
+						? parseInt(payload.companyStudentCount || '1') 
+						: 1,
+					status: 'Pending',
+				},
+			])
+			.select()
+			.single()
 
 		// TODO: Send confirmation email to user
 

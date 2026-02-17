@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma, isValidEmail, sanitizeInput } from '@/lib/db'
+import { supabase, isValidEmail, sanitizeInput } from '@/lib/db'
 import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function POST(req: NextRequest) {
@@ -27,15 +27,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Create message
-    const contact = await prisma.contactMessage.create({
-      data: {
-        name: sanitizeInput(name),
-        email: sanitizeInput(email),
-        subject: sanitizeInput(subject),
-        message: sanitizeInput(message),
-        status: 'Unread',
-      },
-    })
+    const { data: contact, error } = await supabase
+      .from('contact_messages')
+      .insert([
+        {
+          name: sanitizeInput(name),
+          email: sanitizeInput(email),
+          subject: sanitizeInput(subject),
+          message: sanitizeInput(message),
+          status: 'new',
+        },
+      ])
+      .select()
+      .maybeSingle()
+
+    if (error) throw error
 
     // TODO: Send confirmation email to user
     // TODO: Send notification email to admin
@@ -61,12 +67,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
 
-    const where = status ? { status } : {}
+    let query = supabase.from('contact_messages').select('*')
 
-    const messages = await prisma.contactMessage.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    })
+    if (status) {
+      query = query.eq('status', status)
+    }
+
+    const { data: messages, error } = await query.order('created_at', { ascending: false })
+
+    if (error) throw error
 
     return NextResponse.json(
       {

@@ -1,96 +1,100 @@
 -- Supabase SQL migration for school enrollment system
--- 1) Creates tables: formations, profiles, enrollments
--- 2) Enables RLS on profiles and enrollments with example policies
+-- Creates all necessary tables with proper schema
 
--- 1. Create formations table (publicly readable)
+-- 1. Create admin table
+CREATE TABLE IF NOT EXISTS public.admin (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT DEFAULT 'admin',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- 2. Create formations table (training programs)
 CREATE TABLE IF NOT EXISTS public.formations (
-  id BIGSERIAL PRIMARY KEY,
-  slug TEXT UNIQUE NOT NULL,
-  title TEXT NOT NULL,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  category TEXT NOT NULL,
+  duration TEXT NOT NULL,
   description TEXT,
-  capacity INTEGER DEFAULT 0,
-  start_date DATE,
-  end_date DATE,
+  status TEXT DEFAULT 'Draft',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- 2. Create profiles table (one-to-one with auth.users)
--- profiles.id is the user's uuid from auth.users
-CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  full_name TEXT,
+-- 3. Create students table
+CREATE TABLE IF NOT EXISTS public.students (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  type TEXT NOT NULL DEFAULT 'Individual', -- 'Individual' or 'Company'
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
   phone TEXT,
-  company_name TEXT,
+  formation_id UUID REFERENCES public.formations(id),
+  status TEXT DEFAULT 'Active',
+  enrolled_date TIMESTAMP WITH TIME ZONE DEFAULT now(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- 3. Create enrollments table
-CREATE TABLE IF NOT EXISTS public.enrollments (
-  id BIGSERIAL PRIMARY KEY,
-  formation_id BIGINT NOT NULL REFERENCES public.formations(id) ON DELETE CASCADE,
-  student_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'pending',
+-- 4. Create partners table
+CREATE TABLE IF NOT EXISTS public.partners (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  email TEXT UNIQUE NOT NULL,
+  phone TEXT,
+  website TEXT,
+  logo_url TEXT,
+  description TEXT,
+  status TEXT DEFAULT 'Active',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- 4. Enable Row Level Security (RLS) on profiles and enrollments
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.enrollments ENABLE ROW LEVEL SECURITY;
+-- 5. Create inscriptions table
+CREATE TABLE IF NOT EXISTS public.inscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID REFERENCES public.students(id) ON DELETE CASCADE,
+  formation_id UUID REFERENCES public.formations(id) ON DELETE CASCADE,
+  status TEXT DEFAULT 'Pending', -- 'Pending', 'Approved', 'Rejected'
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
 
--- 5. Policies for profiles
--- Allow authenticated users to insert their own profile (id must equal auth.uid())
-CREATE POLICY "profiles_insert_own" ON public.profiles
-  FOR INSERT
-  USING (auth.role() = 'authenticated')
-  WITH CHECK (auth.uid() IS NOT NULL AND auth.uid() = id);
+-- 6. Create contact_messages table
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  status TEXT DEFAULT 'new', -- 'new', 'read', 'resolved'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
 
--- Allow authenticated users to select their own profile
-CREATE POLICY "profiles_select_own" ON public.profiles
-  FOR SELECT
-  USING (auth.uid() = id);
+-- 7. Create indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_formations_status ON public.formations(status);
+CREATE INDEX IF NOT EXISTS idx_formations_category ON public.formations(category);
+CREATE INDEX IF NOT EXISTS idx_students_formation ON public.students(formation_id);
+CREATE INDEX IF NOT EXISTS idx_students_status ON public.students(status);
+CREATE INDEX IF NOT EXISTS idx_students_email ON public.students(email);
+CREATE INDEX IF NOT EXISTS idx_partners_status ON public.partners(status);
+CREATE INDEX IF NOT EXISTS idx_inscriptions_student ON public.inscriptions(student_id);
+CREATE INDEX IF NOT EXISTS idx_inscriptions_formation ON public.inscriptions(formation_id);
+CREATE INDEX IF NOT EXISTS idx_inscriptions_status ON public.inscriptions(status);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON public.contact_messages(status);
 
--- Allow authenticated users to update their own profile
-CREATE POLICY "profiles_update_own" ON public.profiles
-  FOR UPDATE
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
-
--- Allow authenticated users to delete their own profile
-CREATE POLICY "profiles_delete_own" ON public.profiles
-  FOR DELETE
-  USING (auth.uid() = id);
-
--- 6. Policies for enrollments
--- Allow authenticated users to insert an enrollment for themselves (student_id must equal auth.uid())
-CREATE POLICY "enrollments_insert_own" ON public.enrollments
-  FOR INSERT
-  USING (auth.role() = 'authenticated')
-  WITH CHECK (auth.uid() IS NOT NULL AND auth.uid() = student_id);
-
--- Allow users to select their own enrollments
-CREATE POLICY "enrollments_select_own" ON public.enrollments
-  FOR SELECT
-  USING (auth.uid() = student_id);
-
--- Allow users to update their own enrollments (e.g., cancel)
-CREATE POLICY "enrollments_update_own" ON public.enrollments
-  FOR UPDATE
-  USING (auth.uid() = student_id)
-  WITH CHECK (auth.uid() = student_id);
-
--- Allow users to delete their own enrollments
-CREATE POLICY "enrollments_delete_own" ON public.enrollments
-  FOR DELETE
-  USING (auth.uid() = student_id);
-
--- 7. Make formations publicly readable (SELECT)
--- No RLS enabled on formations, so SELECT is allowed by default.
-
--- 8. Optional: Indexes
-CREATE INDEX IF NOT EXISTS idx_formations_start_date ON public.formations(start_date);
-CREATE INDEX IF NOT EXISTS idx_enrollments_student ON public.enrollments(student_id);
+-- 8. Create default formation if it doesn't exist
+INSERT INTO public.formations (name, category, duration, description, status)
+VALUES 
+  ('Web Development', 'Development', '6 months', 'Learn full-stack web development with modern frameworks', 'Active'),
+  ('Data Science', 'Data', '6 months', 'Master data analysis and machine learning', 'Active'),
+  ('UI/UX Design', 'Design', '4 months', 'Learn design principles and tools', 'Active'),
+  ('Cloud Engineering', 'Infrastructure', '5 months', 'AWS and cloud architecture', 'Active'),
+  ('Cybersecurity', 'Security', '6 months', 'Security fundamentals and best practices', 'Active')
+ON CONFLICT (name) DO NOTHING;
 
 -- End of migration

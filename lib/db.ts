@@ -1,18 +1,15 @@
 /**
  * Database Helper Functions
- * Provides typed Prisma client instance for use throughout the app
+ * Supabase client initialization and utility functions
  */
 
-import { PrismaClient } from '@prisma/client'
+import { createClient } from '@supabase/supabase-js'
 
-// Singleton instance to avoid creating multiple connections
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-export const prisma = globalForPrisma.prisma || new PrismaClient()
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma
-}
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 /**
  * Check if email is valid

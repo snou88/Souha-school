@@ -1,18 +1,15 @@
 /**
  * POST /api/auth/register
- * Creates a new admin user (protected endpoint)
+ * Creates a new admin user
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma, isValidEmail } from '@/lib/db'
+import { supabase, isValidEmail } from '@/lib/db'
 import { hashPassword } from '@/lib/auth'
-import { requireAuth, handleApiError, corsHeaders } from '@/lib/api-middleware'
+import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function POST(req: NextRequest) {
   try {
-    // Verify admin authentication
-    const adminId = requireAuth(req)
-
     const { name, email, password } = await req.json()
 
     // Validate input
@@ -38,9 +35,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if email already exists
-    const existing = await prisma.admin.findUnique({
-      where: { email: email.toLowerCase() },
-    })
+    const { data: existing } = await supabase
+      .from('admin')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .maybeSingle()
 
     if (existing) {
       return NextResponse.json(
@@ -53,13 +52,19 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await hashPassword(password)
 
     // Create admin
-    const newAdmin = await prisma.admin.create({
-      data: {
-        name: name.trim(),
-        email: email.toLowerCase(),
-        password: hashedPassword,
-      },
-    })
+    const { data: newAdmin, error } = await supabase
+      .from('admin')
+      .insert([
+        {
+          name: name.trim(),
+          email: email.toLowerCase(),
+          password_hash: hashedPassword,
+        },
+      ])
+      .select()
+      .maybeSingle()
+
+    if (error) throw error
 
     return NextResponse.json(
       {

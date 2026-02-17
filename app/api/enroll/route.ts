@@ -97,13 +97,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Must accept terms
-    if (!payload.agreeTerms) {
-      return NextResponse.json(
-        { success: false, message: 'Must agree to terms and conditions' },
-        { status: 400, headers: corsHeaders() }
-      )
-    }
+    // Suppression de la vérification agreeTerms
 
     // Validate contact fields depending on account type
     if (payload.accountType === 'Individual') {

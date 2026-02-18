@@ -1,206 +1,122 @@
-/**
- * /api/categories
- * - GET:    list categories
- * - POST:   create category
- * - PUT:    update category
- * - DELETE: delete category
- */
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase/server'
 
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/db'
-import { handleApiError, corsHeaders } from '@/lib/api-middleware'
-
-type CategoryStatus = 'Active' | 'Draft' | 'Archived'
-
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9-_\s]/g, '')
-    .replace(/\s+/g, '-')
-}
-
-export async function GET(req: NextRequest) {
+// GET /api/categories
+export async function GET() {
   try {
-    console.log('[CATEGORIES API] Fetching categories from Supabase...')
-    
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('categories')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('[CATEGORIES API] Supabase error:', error)
-      // Check if table doesn't exist
-      const errorMessage = error.message || String(error)
-      const errorCode = (error as any)?.code
-      
-      if (errorCode === '42P01' || errorMessage.toLowerCase().includes('does not exist')) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Database table "categories" does not exist. Please run the SQL migration to create it.',
-            details: { code: errorCode, message: errorMessage },
-          },
-          { status: 500, headers: corsHeaders() }
-        )
-      }
-      
-      throw error
+      console.error('Supabase error:', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    console.log('[CATEGORIES API] Successfully fetched', data?.length || 0, 'categories')
-    
-    return NextResponse.json(
-      { success: true, data: data || [] },
-      { status: 200, headers: corsHeaders() }
-    )
-  } catch (error) {
-    console.error('[CATEGORIES API] Unexpected error:', error)
-    return handleApiError(error)
+    return NextResponse.json({ success: true, data })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function POST(req: NextRequest) {
+// POST /api/categories
+export async function POST(request: Request) {
   try {
-    console.log('[CATEGORIES API] Creating new category...')
-    
-    const body = await req.json()
-    console.log('[CATEGORIES API] Request body:', body)
-    
-    const rawName = (body.name ?? '').toString().trim()
-    const rawSlug = (body.slug ?? '').toString().trim()
-    const status = (body.status ?? 'Active') as CategoryStatus
+    const body = await request.json()
+    const { name, slug, status } = body
 
-    if (!rawName) {
-      return NextResponse.json(
-        { success: false, error: 'Validation failed: name is required' },
-        { status: 400, headers: corsHeaders() }
-      )
+    if (!name) {
+      return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 })
     }
 
-    const slug = rawSlug || slugify(rawName)
-    console.log('[CATEGORIES API] Inserting category:', { name: rawName, slug, status })
+    const finalSlug = slug || slugify(name)
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('categories')
-      .insert([{ name: rawName, slug, status }])
+      .insert([{ name, slug: finalSlug, status }])
       .select()
-      .maybeSingle()
+      .single()
 
     if (error) {
-      console.error('[CATEGORIES API] Supabase insert error:', error)
-      const errorMessage = error.message || String(error)
-      const errorCode = (error as any)?.code
-      
-      if (errorCode === '42P01' || errorMessage.toLowerCase().includes('does not exist')) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Database table "categories" does not exist. Please run the SQL migration to create it.',
-            details: { code: errorCode, message: errorMessage },
-          },
-          { status: 500, headers: corsHeaders() }
-        )
-      }
-      
-      throw error
+      console.error('Supabase error:', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    console.log('[CATEGORIES API] Category created successfully:', data)
-    
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Category created',
-        data,
-      },
-      { status: 201, headers: corsHeaders() }
-    )
-  } catch (error) {
-    console.error('[CATEGORIES API] Unexpected error in POST:', error)
-    return handleApiError(error)
+    return NextResponse.json({ success: true, data })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function PUT(req: NextRequest) {
+// PUT /api/categories
+export async function PUT(request: Request) {
   try {
-    const body = await req.json()
-    const id = body.id
-    const rawName = (body.name ?? '').toString().trim()
-    const rawSlug = (body.slug ?? '').toString().trim()
-    const status = (body.status ?? 'Active') as CategoryStatus
+    const body = await request.json()
+    const { id, name, slug, status } = body
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Validation failed: id is required' },
-        { status: 400, headers: corsHeaders() }
-      )
+      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
     }
 
-    if (!rawName) {
-      return NextResponse.json(
-        { success: false, error: 'Validation failed: name is required' },
-        { status: 400, headers: corsHeaders() }
-      )
-    }
+    const updates: any = {}
+    if (name) updates.name = name
+    if (slug) updates.slug = slug
+    if (status) updates.status = status
+    updates.updated_at = new Date().toISOString()
 
-    const slug = rawSlug || slugify(rawName)
-
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('categories')
-      .update({ name: rawName, slug, status })
+      .update(updates)
       .eq('id', id)
       .select()
-      .maybeSingle()
+      .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Category updated',
-        data,
-      },
-      { status: 200, headers: corsHeaders() }
-    )
-  } catch (error) {
-    return handleApiError(error)
+    return NextResponse.json({ success: true, data })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function DELETE(req: NextRequest) {
+// DELETE /api/categories
+export async function DELETE(request: Request) {
   try {
-    const body = await req.json()
-    const id = body.id
+    const body = await request.json()
+    const { id } = body
 
     if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'Validation failed: id is required' },
-        { status: 400, headers: corsHeaders() }
-      )
+      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('categories')
       .delete()
       .eq('id', id)
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: 'Category deleted',
-      },
-      { status: 200, headers: corsHeaders() }
-    )
-  } catch (error) {
-    return handleApiError(error)
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function OPTIONS(req: NextRequest) {
-  return NextResponse.json({}, { status: 200, headers: corsHeaders() })
+// Helper
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 }
-

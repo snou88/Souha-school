@@ -41,17 +41,38 @@ export async function GET(
     }
 
     // Fetch all formations
+    console.log('[FORMATIONS API] Fetching all formations from Supabase...')
+    
     const { data: formations, error } = await supabase
       .from('formations')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('[FORMATIONS API] Supabase error:', error)
+      const errorMessage = error.message || String(error)
+      const errorCode = (error as any)?.code
+      
+      if (errorCode === '42P01' || errorMessage.toLowerCase().includes('does not exist')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Database table "formations" does not exist. Please run the SQL migration to create it.',
+            details: { code: errorCode, message: errorMessage },
+          },
+          { status: 500, headers: corsHeaders() }
+        )
+      }
+      
+      throw error
+    }
+
+    console.log('[FORMATIONS API] Successfully fetched', formations?.length || 0, 'formations')
 
     return NextResponse.json(
       {
         success: true,
-        data: formations,
+        data: formations || [],
       },
       { status: 200, headers: corsHeaders() }
     )

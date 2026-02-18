@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   Search,
   Filter,
@@ -46,21 +46,6 @@ interface Student {
   number: number // remplace gpa
 }
 
-const allStudents: Student[] = [
-  { id: 1, type: "Individual", name: "Sarah Martinez", email: "sarah.m@email.com", phone: "+1 (555) 012-3456", formation: "Web Development", status: "Active", enrolled: "Sep 2025", number: 1 },
-  { id: 2, type: "Company", name: "TechCorp Solutions", email: "contact@techcorp.com", phone: "+1 (555) 023-4567", formation: "Data Science", status: "Active", enrolled: "Jan 2026", number: 8 },
-  { id: 3, type: "Individual", name: "Emily Chen", email: "emily.c@email.com", phone: "+1 (555) 034-5678", formation: "UI/UX Design", status: "Active", enrolled: "Sep 2025", number: 1 },
-  { id: 4, type: "Individual", name: "Lucas Bernard", email: "lucas.b@email.com", phone: "+1 (555) 045-6789", formation: "Cloud Engineering", status: "Inactive", enrolled: "Jan 2025", number: 1 },
-  { id: 5, type: "Company", name: "GreenApps SARL", email: "hr@greenapps.com", phone: "+1 (555) 056-7890", formation: "Mobile Dev", status: "Active", enrolled: "Sep 2025", number: 5 },
-  { id: 6, type: "Individual", name: "James Wilson", email: "j.wilson@email.com", phone: "+1 (555) 067-8901", formation: "Cybersecurity", status: "Graduated", enrolled: "Jan 2024", number: 1 },
-  { id: 7, type: "Individual", name: "Aisha Patel", email: "a.patel@email.com", phone: "+1 (555) 078-9012", formation: "Data Science", status: "Active", enrolled: "Jan 2026", number: 1 },
-  { id: 8, type: "Individual", name: "Marco Rossi", email: "m.rossi@email.com", phone: "+1 (555) 089-0123", formation: "Web Development", status: "Active", enrolled: "Sep 2025", number: 1 },
-  { id: 9, type: "Company", name: "DesignHouse Ltd.", email: "contact@designhouse.com", phone: "+1 (555) 090-1234", formation: "UI/UX Design", status: "Graduated", enrolled: "Jan 2024", number: 12 },
-  { id: 10, type: "Individual", name: "Omar Hassan", email: "o.hassan@email.com", phone: "+1 (555) 101-2345", formation: "Cloud Engineering", status: "Active", enrolled: "Sep 2025", number: 1 },
-  { id: 11, type: "Individual", name: "Lina Dubois", email: "l.dubois@email.com", phone: "+1 (555) 112-3456", formation: "Mobile Dev", status: "Inactive", enrolled: "Jan 2025", number: 1 },
-  { id: 12, type: "Company", name: "SecureNet Inc.", email: "info@securenet.com", phone: "+1 (555) 123-4567", formation: "Cybersecurity", status: "Active", enrolled: "Jan 2026", number: 20 },
-]
-
 const statusStyles: Record<string, string> = {
   Active: "bg-success/10 text-success border-success/20",
   Inactive: "bg-muted text-muted-foreground border-border",
@@ -70,6 +55,8 @@ const statusStyles: Record<string, string> = {
 const ITEMS_PER_PAGE = 8
 
 export default function StudentsPage() {
+  const [students, setStudents] = useState<Student[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<"all" | Student["status"]>("all")
   const [typeFilter, setTypeFilter] = useState<"all" | Student["type"]>("all")
@@ -77,8 +64,96 @@ export default function StudentsPage() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
   const [deleteStudent, setDeleteStudent] = useState<Student | null>(null)
 
+  async function fetchStudents() {
+    try {
+      const [studentsRes, formationsRes] = await Promise.all([
+        fetch("/api/students"),
+        fetch("/api/formations"),
+      ])
+
+      if (!studentsRes.ok) {
+        const errorText = await studentsRes.text()
+        console.error("Failed to load students - HTTP", studentsRes.status, errorText)
+        try {
+          const errorJson = JSON.parse(errorText)
+          alert(`Failed to load students: ${errorJson.error || studentsRes.statusText}`)
+        } catch {
+          alert(`Failed to load students: ${studentsRes.status} ${studentsRes.statusText}`)
+        }
+        return
+      }
+
+      if (!formationsRes.ok) {
+        console.warn("Failed to load formations - HTTP", formationsRes.status)
+        // Continue without formations - students will show "Unknown" for formation
+      }
+
+      const studentsJson = await studentsRes.json()
+      const formationsJson = formationsRes.ok ? await formationsRes.json() : { success: false, data: [] }
+
+      if (!studentsJson.success) {
+        console.error("Failed to load students", studentsJson)
+        alert(`Failed to load students: ${studentsJson.error || 'Unknown error'}`)
+        return
+      }
+
+      const formations = (formationsJson.success ? formationsJson.data : []) as any[]
+      const formationMap = new Map<number, string>()
+      formations.forEach((f) => {
+        if (typeof f.id === "number") {
+          formationMap.set(f.id, f.name || f.title || "Unknown")
+        }
+      })
+
+      const apiStudents = (studentsJson.data || []) as any[]
+      const mapped: Student[] = apiStudents.map((s) => {
+        const isCompany = s.type === "Company"
+        const fullName =
+          isCompany
+            ? (s.companyName as string | null) ?? s.email
+            : `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim() || s.email
+
+        const formationName =
+          (s.formationId && formationMap.get(s.formationId)) ||
+          (s.formation_id && formationMap.get(s.formation_id)) ||
+          "Unknown"
+
+        const enrolledRaw = s.enrolled_date || s.created_at
+        const enrolled =
+          enrolledRaw ? new Date(enrolledRaw).toLocaleDateString() : ""
+
+        const number =
+          isCompany && typeof s.companyStudentCount === "number"
+            ? s.companyStudentCount
+            : 1
+
+        return {
+          id: s.id,
+          type: isCompany ? "Company" : "Individual",
+          name: fullName,
+          email: s.email,
+          phone: s.phone || "",
+          formation: formationName,
+          status: (s.status as Student["status"]) || "Active",
+          enrolled,
+          number,
+        }
+      })
+
+      setStudents(mapped)
+    } catch (error) {
+      console.error("Error loading students", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchStudents()
+  }, [])
+
   const filtered = useMemo(() => {
-    return allStudents.filter((s) => {
+    return students.filter((s) => {
       const matchSearch =
         s.name.toLowerCase().includes(search.toLowerCase()) ||
         s.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -89,7 +164,7 @@ export default function StudentsPage() {
     })
   }, [search, statusFilter, typeFilter])
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE || 1)
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
 
   return (
@@ -99,7 +174,7 @@ export default function StudentsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Accounts</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage entreprises & clients ({allStudents.length} total)
+            Manage entreprises & clients ({students.length} total)
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -167,7 +242,15 @@ export default function StudentsPage() {
               </tr>
             </thead>
             <tbody>
-              {paginated.map((s) => (
+              {loading && (
+                <tr>
+                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                    Loading accounts...
+                  </td>
+                </tr>
+              )}
+
+              {!loading && paginated.map((s) => (
                 <tr key={s.id} className="border-b border-border last:border-0 transition-colors hover:bg-secondary/20">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
@@ -223,7 +306,7 @@ export default function StudentsPage() {
                 </tr>
               ))}
 
-              {paginated.length === 0 && (
+              {!loading && paginated.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">No accounts found matching your criteria.</td>
                 </tr>

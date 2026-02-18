@@ -2,14 +2,15 @@
  * Database Helper Functions
  * Supabase client initialization and utility functions
  */
-
-import { createClient } from '@supabase/supabase-js'
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+ 
+import { createSupabaseServiceRoleClient } from './supabaseClient'
+ 
+/**
+ * Singleton Supabase client for server-side use.
+ * Uses the service role key so MUST only be imported from server-only code
+ * (API routes, server actions, backend utilities).
+ */
+export const supabase = createSupabaseServiceRoleClient()
 
 /**
  * Check if email is valid
@@ -55,12 +56,10 @@ export function formatErrorResponse(
   error: unknown,
   statusCode: number = 400
 ) {
-  const message =
-    error instanceof Error ? error.message : 'An error occurred'
-
   return {
     success: false,
-    message,
+    error: error instanceof Error ? error.message : 'An error occurred',
+    details: error,
     statusCode,
   }
 }

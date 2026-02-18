@@ -33,35 +33,35 @@ export function requireAuth(req: NextRequest): string {
 
 /**
  * Error handler for API routes
+ * Logs the full error and returns a structured JSON payload.
  */
 export function handleApiError(error: unknown) {
-  if (error instanceof Error) {
-    if (error.message.includes('Unauthorized')) {
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: 401 }
-      )
+  console.error('[API ERROR]', error)
+ 
+  const isErrorInstance = error instanceof Error
+  const message = isErrorInstance ? error.message : 'Internal server error'
+ 
+  const baseBody = {
+    success: false,
+    error: message,
+    details: error,
+  }
+ 
+  if (isErrorInstance) {
+    if (message.includes('Unauthorized')) {
+      return NextResponse.json(baseBody, { status: 401 })
     }
-
-    if (error.message.includes('Not found')) {
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: 404 }
-      )
+ 
+    if (message.includes('Not found')) {
+      return NextResponse.json(baseBody, { status: 404 })
     }
-
-    if (error.message.includes('Validation failed')) {
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: 400 }
-      )
+ 
+    if (message.includes('Validation failed')) {
+      return NextResponse.json(baseBody, { status: 400 })
     }
   }
-
-  return NextResponse.json(
-    { success: false, message: 'Internal server error' },
-    { status: 500 }
-  )
+ 
+  return NextResponse.json(baseBody, { status: 500 })
 }
 
 /**

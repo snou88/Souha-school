@@ -9,6 +9,8 @@ import { handleApiError, corsHeaders } from '@/lib/api-middleware'
 
 export async function GET(req: NextRequest) {
   try {
+    console.log('[STUDENTS API] Fetching students from Supabase...')
+    
     const { searchParams } = new URL(req.url)
     const type = searchParams.get('type')
     const status = searchParams.get('status')
@@ -22,16 +24,36 @@ export async function GET(req: NextRequest) {
 
     const { data: students, error } = await query.order('enrolled_date', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('[STUDENTS API] Supabase error:', error)
+      const errorMessage = error.message || String(error)
+      const errorCode = (error as any)?.code
+      
+      if (errorCode === '42P01' || errorMessage.toLowerCase().includes('does not exist')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Database table "students" does not exist. Please run the SQL migration to create it.',
+            details: { code: errorCode, message: errorMessage },
+          },
+          { status: 500, headers: corsHeaders() }
+        )
+      }
+      
+      throw error
+    }
+
+    console.log('[STUDENTS API] Successfully fetched', students?.length || 0, 'students')
 
     return NextResponse.json(
       {
         success: true,
-        data: students,
+        data: students || [],
       },
       { status: 200, headers: corsHeaders() }
     )
   } catch (error) {
+    console.error('[STUDENTS API] Unexpected error:', error)
     return handleApiError(error)
   }
 }

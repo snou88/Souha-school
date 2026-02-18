@@ -28,14 +28,6 @@ interface Category {
   status: "Active" | "Draft" | "Archived"
 }
 
-const initialCategories: Category[] = [
-  { id: 1, name: "Development", slug: "development", status: "Active" },
-  { id: 2, name: "Data", slug: "data", status: "Active" },
-  { id: 3, name: "Design", slug: "design", status: "Active" },
-  { id: 4, name: "Infrastructure", slug: "infrastructure", status: "Draft" },
-  { id: 5, name: "Security", slug: "security", status: "Archived" },
-]
-
 const statusStyles: Record<string, string> = {
   Active: "bg-success/10 text-success border-success/20",
   Draft: "bg-warning/10 text-warning border-warning/20",
@@ -45,7 +37,8 @@ const statusStyles: Record<string, string> = {
 const ITEMS_PER_PAGE = 9
 
 export default function CategoriesAdminPage() {
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
 
@@ -59,6 +52,38 @@ export default function CategoriesAdminPage() {
     slug: "",
     status: "Active",
   })
+
+  async function fetchCategories() {
+    try {
+      const res = await fetch("/api/categories")
+      
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error("Failed to load categories - HTTP", res.status, errorText)
+        alert(`Failed to load categories: ${res.status} ${res.statusText}`)
+        return
+      }
+      
+      const json = await res.json()
+      
+      if (json.success) {
+        setCategories(json.data || [])
+      } else {
+        console.error("Failed to load categories", json)
+        const errorMsg = json.error || "Unknown error"
+        alert(`Failed to load categories: ${errorMsg}`)
+      }
+    } catch (error) {
+      console.error("Error loading categories", error)
+      alert(`Error loading categories: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
 
   useEffect(() => {
     if (!formOpen) {
@@ -84,6 +109,10 @@ export default function CategoriesAdminPage() {
   }
 
   function handleSave() {
+    void saveCategory()
+  }
+
+  async function saveCategory() {
     const name = formValues.name.trim()
     const slug = (formValues.slug || slugify(name)).trim()
     const status = formValues.status as Category["status"]
@@ -93,22 +122,85 @@ export default function CategoriesAdminPage() {
       return
     }
 
-    if (editing) {
-      setCategories((prev) => prev.map((c) => (c.id === editing.id ? { ...c, name, slug, status } : c)))
-    } else {
-      const id = Date.now()
-      const newCat: Category = { id, name, slug, status }
-      setCategories((prev) => [newCat, ...prev])
-      setPage(1)
-    }
+    try {
+      const method = editing ? "PUT" : "POST"
+      const body = editing
+        ? { id: editing.id, name, slug, status }
+        : { name, slug, status }
 
-    setFormOpen(false)
+      const res = await fetch("/api/categories", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error("Failed to save category - HTTP", res.status, errorText)
+        try {
+          const errorJson = JSON.parse(errorText)
+          alert(errorJson.error || `Failed to save category: ${res.status} ${res.statusText}`)
+        } catch {
+          alert(`Failed to save category: ${res.status} ${res.statusText}`)
+        }
+        return
+      }
+
+      const json = await res.json()
+
+      if (!json.success) {
+        alert(json.error || "Une erreur s'est produite lors de l'enregistrement.")
+        return
+      }
+
+      setFormOpen(false)
+      await fetchCategories()
+      setPage(1)
+    } catch (error) {
+      console.error("Error saving category", error)
+      alert("Une erreur s'est produite lors de l'enregistrement.")
+    }
   }
 
   function handleDeleteConfirm() {
     if (!deleteTarget) return
-    setCategories((prev) => prev.filter((c) => c.id !== deleteTarget.id))
-    setDeleteTarget(null)
+    void deleteCategory(deleteTarget.id)
+  }
+
+  async function deleteCategory(id: number) {
+    try {
+      const res = await fetch("/api/categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        console.error("Failed to delete category - HTTP", res.status, errorText)
+        try {
+          const errorJson = JSON.parse(errorText)
+          alert(errorJson.error || `Failed to delete category: ${res.status} ${res.statusText}`)
+        } catch {
+          alert(`Failed to delete category: ${res.status} ${res.statusText}`)
+        }
+        return
+      }
+
+      const json = await res.json()
+
+      if (!json.success) {
+        alert(json.error || "Une erreur s'est produite lors de la suppression.")
+        return
+      }
+
+      await fetchCategories()
+    } catch (error) {
+      console.error("Error deleting category", error)
+      alert(`Error deleting category: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setDeleteTarget(null)
+    }
   }
 
   const filtered = useMemo(() => {
@@ -161,7 +253,13 @@ export default function CategoriesAdminPage() {
 
       {/* Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {paginated.map((c) => (
+        {loading && (
+          <div className="col-span-full rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+            Chargement des catégories...
+          </div>
+        )}
+
+        {!loading && paginated.map((c) => (
           <article
             key={c.id}
             className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-card to-card/95 p-5 shadow-sm hover:shadow-md transition-shadow"
@@ -206,7 +304,7 @@ export default function CategoriesAdminPage() {
           </article>
         ))}
 
-        {paginated.length === 0 && (
+        {!loading && paginated.length === 0 && (
           <div className="col-span-full rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
             Aucune catégorie trouvée.
           </div>

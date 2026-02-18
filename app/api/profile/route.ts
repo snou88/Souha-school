@@ -1,0 +1,200 @@
+import { NextResponse } from 'next/server'
+import { supabaseAdmin } from '@/lib/supabase/server'
+import bcrypt from 'bcryptjs'
+
+// GET /api/admin - Récupérer tous les admins
+export async function GET() {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('admin')
+      .select('id, name, email, role, created_at')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ 
+        success: false, 
+        error: error.message 
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      data: data || [] 
+    })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Internal server error' 
+    }, { status: 500 })
+  }
+}
+
+// POST /api/admin - Créer un nouvel admin
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const { name, email, password } = body
+
+    // Validation
+    if (!name || !email || !password) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Name, email and password are required' 
+      }, { status: 400 })
+    }
+
+    // Vérifier si l'email existe déjà
+    const { data: existingAdmin, error: checkError } = await supabaseAdmin
+      .from('admin')
+      .select('email')
+      .eq('email', email)
+      .single()
+
+    if (existingAdmin) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Email already exists' 
+      }, { status: 400 })
+    }
+
+    // Hasher le mot de passe
+    const salt = await bcrypt.genSalt(10)
+    const password_hash = await bcrypt.hash(password, salt)
+
+    // Insérer le nouvel admin
+    const { data, error } = await supabaseAdmin
+      .from('admin')
+      .insert([
+        {
+          name,
+          email,
+          password_hash,
+          role: 'admin'
+        }
+      ])
+      .select('id, name, email, role, created_at')
+      .single()
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ 
+        success: false, 
+        error: error.message 
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      data 
+    })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Internal server error' 
+    }, { status: 500 })
+  }
+}
+
+// PUT /api/admin - Modifier un admin
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json()
+    const { id, name, email } = body
+
+    if (!id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'ID is required' 
+      }, { status: 400 })
+    }
+
+    // Vérifier si l'email existe déjà pour un autre admin
+    if (email) {
+      const { data: existingAdmin } = await supabaseAdmin
+        .from('admin')
+        .select('id')
+        .eq('email', email)
+        .neq('id', id)
+        .single()
+
+      if (existingAdmin) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Email already used by another admin' 
+        }, { status: 400 })
+      }
+    }
+
+    // Mettre à jour l'admin
+    const { data, error } = await supabaseAdmin
+      .from('admin')
+      .update({ 
+        name, 
+        email,
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', id)
+      .select('id, name, email, role, created_at')
+      .single()
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ 
+        success: false, 
+        error: error.message 
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      data 
+    })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Internal server error' 
+    }, { status: 500 })
+  }
+}
+
+// DELETE /api/admin - Supprimer un admin
+export async function DELETE(request: Request) {
+  try {
+    const body = await request.json()
+    const { id } = body
+
+    if (!id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'ID is required' 
+      }, { status: 400 })
+    }
+
+    const { error } = await supabaseAdmin
+      .from('admin')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ 
+        success: false, 
+        error: error.message 
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({ 
+      success: true 
+    })
+  } catch (err) {
+    console.error('Unexpected error:', err)
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Internal server error' 
+    }, { status: 500 })
+  }
+}

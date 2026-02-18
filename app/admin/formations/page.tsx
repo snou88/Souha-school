@@ -76,7 +76,7 @@ export default function FormationsAdminPage() {
     }
 
     try {
-      const response = await fetch('/api/formations/create', {
+      const response = await fetch('/api/formations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

@@ -1,15 +1,13 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   Search,
-  Filter,
   Check,
   X,
   Eye,
   ChevronLeft,
   ChevronRight,
-  Download,
   Clock,
   CheckCircle2,
   XCircle,
@@ -36,14 +34,6 @@ interface Inscription {
   status: "Pending" | "Approved" | "Rejected"
 }
 
-const inscriptions: Inscription[] = [
-  { id: 1, type: "Individual", name: "Sarah Martinez", email: "sarah.m@email.com", formation: "Web Development", date: "Feb 12, 2026", number: 1, status: "Pending" },
-  { id: 2, type: "Company", name: "TechCorp Solutions", email: "contact@techcorp.com", formation: "Data Science", date: "Feb 11, 2026", number: 6, status: "Pending" },
-  { id: 3, type: "Individual", name: "Emily Chen", email: "emily.c@email.com", formation: "UI/UX Design", date: "Feb 10, 2026", number: 1, status: "Approved" },
-  { id: 4, type: "Company", name: "DesignHouse Ltd.", email: "contact@designhouse.com", formation: "UI/UX Design", date: "Feb 09, 2026", number: 12, status: "Rejected" },
-  { id: 5, type: "Individual", name: "Omar Hassan", email: "o.hassan@email.com", formation: "Cloud Engineering", date: "Feb 08, 2026", number: 1, status: "Pending" },
-]
-
 const statusStyles: Record<string, string> = {
   Approved: "bg-success/10 text-success border-success/20",
   Pending: "bg-warning/10 text-warning border-warning/20",
@@ -59,10 +49,57 @@ const statusIcons: Record<string, any> = {
 const ITEMS_PER_PAGE = 8
 
 export default function InscriptionsAdminPage() {
+  const [inscriptions, setInscriptions] = useState<Inscription[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
   const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    fetch("/api/inscriptions")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setInscriptions(data.data)
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleApprove(id: number) {
+    const res = await fetch("/api/inscriptions", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: "Approved" })
+    })
+    const result = await res.json()
+    if (result.success) {
+      setInscriptions((prev) => prev.map(i => i.id === id ? { ...i, status: "Approved" } : i))
+    }
+  }
+
+  async function handleReject(id: number) {
+    const res = await fetch("/api/inscriptions", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status: "Rejected" })
+    })
+    const result = await res.json()
+    if (result.success) {
+      setInscriptions((prev) => prev.map(i => i.id === id ? { ...i, status: "Rejected" } : i))
+    }
+  }
+
+  async function handleDelete(id: number) {
+    const res = await fetch("/api/inscriptions", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id })
+    })
+    const result = await res.json()
+    if (result.success) {
+      setInscriptions((prev) => prev.filter(i => i.id !== id))
+    }
+  }
 
   const filtered = useMemo(() => {
     return inscriptions.filter((i) => {
@@ -73,7 +110,7 @@ export default function InscriptionsAdminPage() {
       const matchType = typeFilter === "all" || i.type === typeFilter
       return matchSearch && matchStatus && matchType
     })
-  }, [search, statusFilter, typeFilter])
+  }, [search, statusFilter, typeFilter, inscriptions])
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
@@ -83,6 +120,17 @@ export default function InscriptionsAdminPage() {
     pending: inscriptions.filter((i) => i.status === "Pending").length,
     approved: inscriptions.filter((i) => i.status === "Approved").length,
     rejected: inscriptions.filter((i) => i.status === "Rejected").length,
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-sm text-muted-foreground">Loading inscriptions...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -124,7 +172,7 @@ export default function InscriptionsAdminPage() {
             placeholder="Search by name or formation..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
-            className="h-9 w-full rounded-lg border border-input bg-card pl-9 pr-4 text-sm"
+            className="h-9 w-full rounded-lg border border-input bg-card pl-9 pr-4 text-sm outline-none focus:border-primary"
           />
         </div>
 
@@ -167,73 +215,115 @@ export default function InscriptionsAdminPage() {
               </tr>
             </thead>
             <tbody>
-              {paginated.map((row) => {
-                const StatusIcon = statusIcons[row.status]
-                return (
-                  <tr key={row.id} className="border-b border-border hover:bg-secondary/20">
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                            {row.name.split(" ").map((n) => n[0]).join("").slice(0,3)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium">{row.name}</p>
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                "text-[10px] font-semibold",
-                                row.type === "Company"
-                                  ? "bg-primary/10 text-primary border-primary/20"
-                                  : "bg-secondary text-muted-foreground border-border"
-                              )}
-                            >
-                              {row.type}
-                            </Badge>
+              {paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
+                    No inscriptions found
+                  </td>
+                </tr>
+              ) : (
+                paginated.map((row) => {
+                  const StatusIcon = statusIcons[row.status]
+                  return (
+                    <tr key={row.id} className="border-b border-border hover:bg-secondary/20">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                              {row.name.split(" ").map((n) => n[0]).join("").slice(0,2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium">{row.name}</p>
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  "text-[10px] font-semibold",
+                                  row.type === "Company"
+                                    ? "bg-primary/10 text-primary border-primary/20"
+                                    : "bg-secondary text-muted-foreground border-border"
+                                )}
+                              >
+                                {row.type}
+                              </Badge>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground">{row.email}</p>
                           </div>
-                          <p className="text-[11px] text-muted-foreground">{row.email}</p>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-5 py-3.5 text-sm text-muted-foreground">{row.formation}</td>
-                    <td className="px-5 py-3.5 text-sm text-muted-foreground">{row.date}</td>
-                    <td className="px-5 py-3.5 text-sm font-semibold">{row.number}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground">{row.formation}</td>
+                      <td className="px-5 py-3.5 text-sm text-muted-foreground">{row.date}</td>
+                      <td className="px-5 py-3.5 text-sm font-semibold">{row.number}</td>
 
-                    <td className="px-5 py-3.5">
-                      <Badge variant="outline" className={cn("gap-1 text-[11px] font-semibold", statusStyles[row.status])}>
-                        <StatusIcon className="h-3 w-3" />
-                        {row.status}
-                      </Badge>
-                    </td>
+                      <td className="px-5 py-3.5">
+                        <Badge variant="outline" className={cn("gap-1 text-[11px] font-semibold", statusStyles[row.status])}>
+                          <StatusIcon className="h-3 w-3" />
+                          {row.status}
+                        </Badge>
+                      </td>
 
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center justify-end gap-1">
-                        {row.status === "Pending" && (
-                          <>
-                            <button className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-success hover:bg-success/10">
-                              <Check className="h-3.5 w-3.5" />
-                              Approve
-                            </button>
-                            <button className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-destructive hover:bg-destructive/10">
-                              <X className="h-3.5 w-3.5" />
-                              Reject
-                            </button>
-                          </>
-                        )}
-                        <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary">
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center justify-end gap-1">
+                          {row.status === "Pending" && (
+                            <>
+                              <button 
+                                onClick={() => handleApprove(row.id)} 
+                                className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-success hover:bg-success/10"
+                              >
+                                <Check className="h-3.5 w-3.5" />
+                                Approve
+                              </button>
+                              <button 
+                                onClick={() => handleReject(row.id)} 
+                                className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-destructive hover:bg-destructive/10"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          <button 
+                            onClick={() => console.log("View details", row.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-border px-5 py-3">
+            <p className="text-xs text-muted-foreground">
+              Showing {((page - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} results
+            </p>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border hover:bg-secondary disabled:opacity-50"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border hover:bg-secondary disabled:opacity-50"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

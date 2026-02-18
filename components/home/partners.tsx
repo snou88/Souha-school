@@ -1,21 +1,24 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import Image from "next/image";
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 const partners = [
-  "/image/image.png",
-  "/image/image.png",
-  "/image/image.png",
-  "/image/image.png",
-  "/image/image.png",
-]
+  "/partenaires/algerie.png",
+  "/partenaires/dulcesol.png",
+  "/partenaires/erenav.png",
+  "/partenaires/Logo-bimo.png",
+  "/partenaires/Logo-FONDAL.png",
+  "/partenaires/SAFEX-logo.png",
+  "/partenaires/snta.png",
+  "/partenaires/sonlgaz.png",
+];
 
 export default function PartnersSection() {
-  useScrollAnimation()
+  useScrollAnimation();
 
   // Duplique le tableau plusieurs fois pour un effet seamless plus fluide
-  const logosLoop = [...partners, ...partners, ...partners]
+  const logosLoop = [...partners, ...partners, ...partners];
 
   return (
     <section className="relative py-24 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
@@ -38,7 +41,7 @@ export default function PartnersSection() {
           {logosLoop.map((src, i) => (
             <div
               key={`r1-${i}`}
-              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
+              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl   transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
             >
               <Image
                 src={src}
@@ -56,7 +59,7 @@ export default function PartnersSection() {
           {logosLoop.map((src, i) => (
             <div
               key={`r2-${i}`}
-              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
+              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl   transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
             >
               <Image
                 src={src}
@@ -107,7 +110,18 @@ export default function PartnersSection() {
         .animate-marquee-reverse {
           animation: marquee-reverse 30s linear infinite;
         }
+
+        /* ✅ Media query correcte */
+        @media (max-width: 767px) {
+          .animate-marquee {
+            animation: marquee 5s linear infinite;
+          }
+
+          .animate-marquee-reverse {
+            animation: marquee-reverse 5s linear infinite;
+          }
+        }
       `}</style>
     </section>
-  )
+  );
 }

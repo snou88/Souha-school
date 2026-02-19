@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react'
-import { createSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
@@ -10,7 +10,7 @@ export default function ProfilePage() {
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    const supabase = createSupabaseClient()
+    const supabase = createClient()
     supabase.auth.getSession().then(async (s) => {
       const token = s.data?.session?.access_token
       if (!token) {
@@ -29,7 +29,7 @@ export default function ProfilePage() {
 
   async function save() {
     setMessage(null)
-    const supabase = createSupabaseClient()
+    const supabase = createClient()
     const s = await supabase.auth.getSession()
     const token = s.data?.session?.access_token
     if (!token) return setMessage('Not authenticated')

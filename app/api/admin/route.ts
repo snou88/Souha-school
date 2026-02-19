@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/server'
 import bcrypt from 'bcryptjs'
 
 // GET /api/admin - Récupérer tous les admins
 export async function GET() {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('admin')  // Changé de 'admins' à 'admin'
       .select('id, name, email, role, created_at')
@@ -218,6 +219,7 @@ export async function DELETE(request: Request) {
       }, { status: 400 })
     }
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin
       .from('admin')  // Changé de 'admins' à 'admin'
       .delete()

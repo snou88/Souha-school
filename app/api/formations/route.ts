@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase/server"
+import { getSupabaseAdmin } from "@/lib/supabase/server"
 
 // ==============================
 // GET /api/formations
 // ==============================
 export async function GET() {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from("formations")
       .select(`
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
       )
     }
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from("formations")
       .insert([
@@ -109,6 +111,7 @@ export async function PUT(request: Request) {
 
     updates.updated_at = new Date().toISOString()
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from("formations")
       .update(updates)
@@ -149,6 +152,7 @@ export async function DELETE(request: Request) {
       )
     }
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin
       .from("formations")
       .delete()

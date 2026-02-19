@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/server'
 
 // GET /api/inscriptions - Récupère toutes les inscriptions
 export async function GET() {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('inscriptions')
       .select(`
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
     }
 
     // 1. Trouver l'ID de la formation
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: formationData, error: formationError } = await supabaseAdmin
       .from('formations')
       .select('id')
@@ -149,6 +151,7 @@ export async function PUT(request: Request) {
     }
 
     // Mettre à jour l'inscription
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: inscription, error: inscriptionError } = await supabaseAdmin
       .from('inscriptions')
       .update({ 
@@ -204,6 +207,7 @@ export async function DELETE(request: Request) {
     }
 
     // Récupérer le student_id associé
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: inscription, error: fetchError } = await supabaseAdmin
       .from('inscriptions')
       .select('student_id')

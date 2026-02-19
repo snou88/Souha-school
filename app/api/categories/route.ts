@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/server'
 
 // GET /api/categories
 export async function GET() {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('categories')
       .select('*')
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
 
     const finalSlug = slug || slugify(name)
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('categories')
       .insert([{ name, slug: finalSlug, status }])
@@ -67,6 +69,7 @@ export async function PUT(request: Request) {
     if (status) updates.status = status
     updates.updated_at = new Date().toISOString()
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { data, error } = await supabaseAdmin
       .from('categories')
       .update(updates)
@@ -96,6 +99,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: "L’identifiant est requis." }, { status: 400 })
     }
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin
       .from('categories')
       .delete()

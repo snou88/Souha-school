@@ -1,2 +1,7 @@
-// Copie du contenu de middleware.ts pour respecter la nouvelle convention Next.js
-// ...existing code...
+import { NextResponse } from 'next/server';
+
+// Exemple de proxy (anciennement middleware)
+export default function proxy(request: Request) {
+	// Ajoute ici ta logique de filtrage, d'authentification, etc.
+	return NextResponse.next();
+}

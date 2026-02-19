@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import {
   User,
@@ -17,18 +17,6 @@ const steps = [
   { id: 2, title: "Details", icon: User },
   { id: 3, title: "Program", icon: BookOpen },
 ] as const
-
-const programs = [
-  "Full-Stack Web Development",
-  "Data Science & Analytics",
-  "UX/UI Design Mastery",
-  "Digital Marketing Strategy",
-  "Cybersecurity Fundamentals",
-  "Cloud & DevOps Engineering",
-  "AI & Machine Learning",
-  "Mobile App Development",
-  "Project Management Professional",
-]
 
 const accountTypes = ["Individual", "Company"] as const
 type AccountType = (typeof accountTypes)[number]
@@ -89,7 +77,6 @@ function validateStep(step: number, data: FormData): FormErrors {
   if (step === 3) {
     if (!data.selectedProgram) errors.selectedProgram = "Please select a program."
     if (!data.startDate) errors.startDate = "Preferred start date is required."
-    // Suppression de la validation agreeTerms
   }
 
   return errors
@@ -120,6 +107,29 @@ export function InscriptionForm() {
     agreeTerms: false,
   })
 
+  // State pour les programmes
+  const [programs, setPrograms] = useState<Array<{ id: string; name: string }>>([])
+  const [programsLoading, setProgramsLoading] = useState(true)
+  const [programsError, setProgramsError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchPrograms() {
+      setProgramsLoading(true)
+      setProgramsError(null)
+      try {
+        const res = await fetch("/api/formations")
+        const json = await res.json()
+        if (!json.success) throw new Error(json.error || "Failed to fetch programs")
+        setPrograms(Array.isArray(json.data) ? json.data.map((f: any) => ({ id: f.id, name: f.name })) : [])
+      } catch (e: any) {
+        setProgramsError(e.message || "Erreur lors du chargement des programmes")
+      } finally {
+        setProgramsLoading(false)
+      }
+    }
+    fetchPrograms()
+  }, [])
+
   useScrollAnimation()
 
   function update(field: keyof FormData, value: string | boolean) {
@@ -134,18 +144,52 @@ export function InscriptionForm() {
   async function submitEnrollment(payload: FormData) {
     try {
       setLoading(true)
-      const res = await fetch("/api/enroll", {
+      
+      // Construction du payload
+      let apiPayload: any = {
+        type: payload.accountType,
+        formation: payload.selectedProgram,
+        status: "Pending"
+      }
+
+      if (payload.accountType === "Individual") {
+        apiPayload = {
+          ...apiPayload,
+          name: `${payload.firstName} ${payload.lastName}`.trim(),
+          email: payload.email,
+          phone: payload.phone,
+          number: 1
+        }
+      } else if (payload.accountType === "Company") {
+        apiPayload = {
+          ...apiPayload,
+          name: payload.companyName,
+          email: payload.companyContactEmail,
+          phone: payload.companyPhone,
+          number: Number(payload.companyStudentCount) || 1,
+        }
+      }
+
+      console.log("📤 Envoi des données:", apiPayload)
+
+      const res = await fetch("/api/inscriptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(apiPayload),
       })
+
+      const responseData = await res.json()
+      console.log("📥 Réponse API:", responseData)
+
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || "Submission failed")
+        throw new Error(responseData.error || "Submission failed")
       }
+
+      // Succès !
       setCompleted(true)
+      
     } catch (e: any) {
-      // surface a friendly error (you can improve this UX)
+      console.error("❌ Erreur:", e)
       setErrors({ form: e.message || "Network error" })
     } finally {
       setLoading(false)
@@ -157,7 +201,6 @@ export function InscriptionForm() {
     setErrors(stepErrors)
     if (Object.keys(stepErrors).length === 0) {
       if (currentStep === steps.length) {
-        // final submit
         submitEnrollment(formData)
       } else {
         setCurrentStep((s) => s + 1)
@@ -246,11 +289,15 @@ export function InscriptionForm() {
                 </div>
                 <h2 className="mt-6 text-2xl font-bold text-foreground">Application Submitted!</h2>
                 <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                  Thank you, {formData.accountType === "Individual" ? formData.firstName : formData.companyName}!
+                  Thank you, {formData.accountType === "Individual" 
+                    ? `${formData.firstName} ${formData.lastName}`.trim()
+                    : formData.companyName}!
                   Your enrollment for <span className="font-semibold text-foreground">{formData.selectedProgram}</span>{" "}
                   has been received. A confirmation will be sent to{" "}
                   <span className="font-semibold text-foreground">
-                    {formData.accountType === "Individual" ? formData.email : formData.companyContactEmail || formData.email}
+                    {formData.accountType === "Individual" 
+                      ? formData.email 
+                      : formData.companyContactEmail}
                   </span>
                   .
                 </p>
@@ -281,7 +328,7 @@ export function InscriptionForm() {
                               <div className="font-medium text-foreground">{t}</div>
                               <div className="text-sm text-muted-foreground">
                                 {t === "Individual"
-                                  ? "I am enrollling myself"
+                                  ? "I am enrolling myself"
                                   : "Enroll multiple employees / learners"}
                               </div>
                             </div>
@@ -490,11 +537,17 @@ export function InscriptionForm() {
                         onChange={(e) => update("selectedProgram", e.target.value)}
                       >
                         <option value="">Choose a program</option>
-                        {programs.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
-                          </option>
-                        ))}
+                        {programsLoading && <option disabled>Loading programs...</option>}
+                        {programsError && <option disabled>Error loading programs</option>}
+                        {!programsLoading && !programsError && programs.length === 0 && (
+                          <option disabled>No programs available</option>
+                        )}
+                        {!programsLoading && !programsError &&
+                          programs.map((p) => (
+                            <option key={p.id} value={p.name}>
+                              {p.name}
+                            </option>
+                          ))}
                       </select>
                       {errors.selectedProgram && <p className="mt-1 text-xs text-destructive">{errors.selectedProgram}</p>}
                     </div>
@@ -516,8 +569,6 @@ export function InscriptionForm() {
                       </select>
                       {errors.startDate && <p className="mt-1 text-xs text-destructive">{errors.startDate}</p>}
                     </div>
-
-                    {/* Case à cocher supprimée comme demandé */}
                   </div>
                 )}
 
@@ -540,7 +591,7 @@ export function InscriptionForm() {
                   <button
                     onClick={handleNext}
                     disabled={loading}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98]"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {currentStep === steps.length ? (loading ? "Submitting..." : "Submit Application") : "Continue"}
                     {currentStep < steps.length && <ArrowRight className="h-4 w-4" />}

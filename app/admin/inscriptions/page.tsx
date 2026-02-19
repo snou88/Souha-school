@@ -56,48 +56,94 @@ export default function InscriptionsAdminPage() {
   const [typeFilter, setTypeFilter] = useState("all")
   const [page, setPage] = useState(1)
 
+  // Charger les inscriptions
   useEffect(() => {
-    fetch("/api/inscriptions")
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setInscriptions(data.data)
-      })
-      .finally(() => setLoading(false))
+    fetchInscriptions()
   }, [])
 
+  async function fetchInscriptions() {
+    try {
+      setLoading(true)
+      const res = await fetch("/api/inscriptions")
+      const data = await res.json()
+      console.log("📦 Données reçues:", data)
+      
+      if (data.success && Array.isArray(data.data)) {
+        setInscriptions(data.data)
+        console.log("✅ Inscriptions chargées:", data.data.length)
+      } else {
+        console.error("❌ Format de données invalide:", data)
+        setInscriptions([])
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors du chargement:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   async function handleApprove(id: number) {
-    const res = await fetch("/api/inscriptions", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status: "Approved" })
-    })
-    const result = await res.json()
-    if (result.success) {
-      setInscriptions((prev) => prev.map(i => i.id === id ? { ...i, status: "Approved" } : i))
+    try {
+      console.log("🟢 Approbation de l'inscription:", id)
+      const res = await fetch("/api/inscriptions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: "Approved" })
+      })
+      const result = await res.json()
+      console.log("Réponse approve:", result)
+      
+      if (result.success) {
+        setInscriptions((prev) => 
+          prev.map(i => i.id === id ? { ...i, status: "Approved" } : i)
+        )
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors de l'approbation:", error)
     }
   }
 
   async function handleReject(id: number) {
-    const res = await fetch("/api/inscriptions", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status: "Rejected" })
-    })
-    const result = await res.json()
-    if (result.success) {
-      setInscriptions((prev) => prev.map(i => i.id === id ? { ...i, status: "Rejected" } : i))
+    try {
+      console.log("🔴 Rejet de l'inscription:", id)
+      const res = await fetch("/api/inscriptions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: "Rejected" })
+      })
+      const result = await res.json()
+      console.log("Réponse reject:", result)
+      
+      if (result.success) {
+        setInscriptions((prev) => 
+          prev.map(i => i.id === id ? { ...i, status: "Rejected" } : i)
+        )
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors du rejet:", error)
     }
   }
 
   async function handleDelete(id: number) {
-    const res = await fetch("/api/inscriptions", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id })
-    })
-    const result = await res.json()
-    if (result.success) {
-      setInscriptions((prev) => prev.filter(i => i.id !== id))
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette inscription ?")) {
+      return
+    }
+    
+    try {
+      console.log("🗑️ Suppression de l'inscription:", id)
+      const res = await fetch("/api/inscriptions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      })
+      const result = await res.json()
+      console.log("Réponse delete:", result)
+      
+      if (result.success) {
+        setInscriptions((prev) => prev.filter(i => i.id !== id))
+      }
+    } catch (error) {
+      console.error("❌ Erreur lors de la suppression:", error)
     }
   }
 
@@ -285,10 +331,10 @@ export default function InscriptionsAdminPage() {
                             </>
                           )}
                           <button 
-                            onClick={() => console.log("View details", row.id)}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-secondary"
+                            onClick={() => handleDelete(row.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                           >
-                            <Eye className="h-4 w-4" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 4V3c0-1 1-2 2-2h4c1 0 2 1 2 2v1"/></svg>
                           </button>
                         </div>
                       </td>

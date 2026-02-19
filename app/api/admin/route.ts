@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
-      .from('admin')
+      .from('admin')  // Changé de 'admins' à 'admin'
       .select('id, name, email, role, created_at')
       .order('created_at', { ascending: false })
 
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     // Vérifier si l'email existe déjà
     const { data: existingAdmin, error: checkError } = await supabaseAdmin
-      .from('admin')
+      .from('admin')  // Changé de 'admins' à 'admin'
       .select('email')
       .eq('email', email)
       .maybeSingle()
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
 
     // Insérer le nouvel admin
     const { data, error } = await supabaseAdmin
-      .from('admin')
+      .from('admin')  // Changé de 'admins' à 'admin'
       .insert([
         {
           name,
@@ -131,7 +131,7 @@ export async function PUT(request: Request) {
 
     // Vérifier si l'admin existe
     const { data: adminExists, error: checkExistsError } = await supabaseAdmin
-      .from('admin')
+      .from('admin')  // Changé de 'admins' à 'admin'
       .select('id')
       .eq('id', id)
       .single()
@@ -146,7 +146,7 @@ export async function PUT(request: Request) {
     // Vérifier si l'email existe déjà pour un autre admin
     if (email) {
       const { data: existingAdmin } = await supabaseAdmin
-        .from('admin')
+        .from('admin')  // Changé de 'admins' à 'admin'
         .select('id')
         .eq('email', email)
         .neq('id', id)
@@ -162,7 +162,7 @@ export async function PUT(request: Request) {
 
     // Mettre à jour l'admin
     const { data, error } = await supabaseAdmin
-      .from('admin')
+      .from('admin')  // Changé de 'admins' à 'admin'
       .update({ 
         name, 
         email,
@@ -208,7 +208,7 @@ export async function DELETE(request: Request) {
 
     // Vérifier si c'est le dernier admin
     const { count, error: countError } = await supabaseAdmin
-      .from('admin')
+      .from('admin')  // Changé de 'admins' à 'admin'
       .select('*', { count: 'exact', head: true })
 
     if (count === 1) {
@@ -219,7 +219,7 @@ export async function DELETE(request: Request) {
     }
 
     const { error } = await supabaseAdmin
-      .from('admin')
+      .from('admin')  // Changé de 'admins' à 'admin'
       .delete()
       .eq('id', id)
 

@@ -10,7 +10,6 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  Download,
   Mail,
   Phone,
   BookOpen,
@@ -41,14 +40,15 @@ interface Student {
   email: string
   phone: string
   formation: string
-  status: "Active" | "Inactive" | "Graduated"
+  status: "Active" | "Inactive" | "Pending" | "Graduated"
   enrolled: string
-  number: number // remplace gpa
+  number: number
 }
 
 const statusStyles: Record<string, string> = {
   Active: "bg-success/10 text-success border-success/20",
   Inactive: "bg-muted text-muted-foreground border-border",
+  Pending: "bg-warning/10 text-warning border-warning/20",
   Graduated: "bg-primary/10 text-primary border-primary/20",
 }
 
@@ -66,83 +66,21 @@ export default function StudentsPage() {
 
   async function fetchStudents() {
     try {
-      const [studentsRes, formationsRes] = await Promise.all([
-        fetch("/api/students"),
-        fetch("/api/formations"),
-      ])
-
-      if (!studentsRes.ok) {
-        const errorText = await studentsRes.text()
-        console.error("Failed to load students - HTTP", studentsRes.status, errorText)
-        try {
-          const errorJson = JSON.parse(errorText)
-          alert(`Failed to load students: ${errorJson.error || studentsRes.statusText}`)
-        } catch {
-          alert(`Failed to load students: ${studentsRes.status} ${studentsRes.statusText}`)
-        }
-        return
+      setLoading(true)
+      const res = await fetch("/api/students")
+      const data = await res.json()
+      
+      console.log("📦 Données students reçues:", data)
+      
+      if (data.success && Array.isArray(data.data)) {
+        setStudents(data.data)
+        console.log("✅ Students chargés:", data.data.length)
+      } else {
+        console.error("❌ Format invalide:", data)
+        setStudents([])
       }
-
-      if (!formationsRes.ok) {
-        console.warn("Failed to load formations - HTTP", formationsRes.status)
-        // Continue without formations - students will show "Unknown" for formation
-      }
-
-      const studentsJson = await studentsRes.json()
-      const formationsJson = formationsRes.ok ? await formationsRes.json() : { success: false, data: [] }
-
-      if (!studentsJson.success) {
-        console.error("Failed to load students", studentsJson)
-        alert(`Failed to load students: ${studentsJson.error || 'Unknown error'}`)
-        return
-      }
-
-      const formations = (formationsJson.success ? formationsJson.data : []) as any[]
-      const formationMap = new Map<number, string>()
-      formations.forEach((f) => {
-        if (typeof f.id === "number") {
-          formationMap.set(f.id, f.name || f.title || "Unknown")
-        }
-      })
-
-      const apiStudents = (studentsJson.data || []) as any[]
-      const mapped: Student[] = apiStudents.map((s) => {
-        const isCompany = s.type === "Company"
-        const fullName =
-          isCompany
-            ? (s.companyName as string | null) ?? s.email
-            : `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim() || s.email
-
-        const formationName =
-          (s.formationId && formationMap.get(s.formationId)) ||
-          (s.formation_id && formationMap.get(s.formation_id)) ||
-          "Unknown"
-
-        const enrolledRaw = s.enrolled_date || s.created_at
-        const enrolled =
-          enrolledRaw ? new Date(enrolledRaw).toLocaleDateString() : ""
-
-        const number =
-          isCompany && typeof s.companyStudentCount === "number"
-            ? s.companyStudentCount
-            : 1
-
-        return {
-          id: s.id,
-          type: isCompany ? "Company" : "Individual",
-          name: fullName,
-          email: s.email,
-          phone: s.phone || "",
-          formation: formationName,
-          status: (s.status as Student["status"]) || "Active",
-          enrolled,
-          number,
-        }
-      })
-
-      setStudents(mapped)
     } catch (error) {
-      console.error("Error loading students", error)
+      console.error("❌ Erreur lors du chargement:", error)
     } finally {
       setLoading(false)
     }
@@ -162,26 +100,38 @@ export default function StudentsPage() {
       const matchType = typeFilter === "all" || s.type === typeFilter
       return matchSearch && matchStatus && matchType
     })
-  }, [search, statusFilter, typeFilter])
+  }, [search, statusFilter, typeFilter, students])
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE || 1)
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+
+  async function handleDelete(id: number) {
+    try {
+      const res = await fetch("/api/students", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      })
+      const data = await res.json()
+      
+      if (data.success) {
+        setStudents(prev => prev.filter(s => s.id !== id))
+        setDeleteStudent(null)
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression:", error)
+    }
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Accounts</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Students</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage entreprises & clients ({students.length} total)
+            Manage students and companies ({students.length} total)
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110">
-            <Plus className="h-4 w-4" />
-            Add Account
-          </button>
         </div>
       </div>
 
@@ -207,6 +157,7 @@ export default function StudentsPage() {
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
+              <SelectItem value="Pending">Pending</SelectItem>
               <SelectItem value="Inactive">Inactive</SelectItem>
               <SelectItem value="Graduated">Graduated</SelectItem>
             </SelectContent>
@@ -233,10 +184,10 @@ export default function StudentsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-secondary/30">
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Account</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Student</th>
                 <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Formation</th>
                 <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Enrolled</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Number</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Seats</th>
                 <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
                 <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Actions</th>
               </tr>
@@ -245,7 +196,10 @@ export default function StudentsPage() {
               {loading && (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">
-                    Loading accounts...
+                    <div className="flex justify-center">
+                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                    </div>
+                    <p className="mt-2">Loading students...</p>
                   </td>
                 </tr>
               )}
@@ -256,7 +210,7 @@ export default function StudentsPage() {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
                         <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                          {s.name.split(" ").map((n) => n[0]).join("").slice(0,3)}
+                          {s.name.split(" ").map((n) => n[0]).join("").slice(0,2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -281,24 +235,37 @@ export default function StudentsPage() {
 
                   <td className="px-5 py-3.5 text-sm text-muted-foreground">{s.formation}</td>
                   <td className="px-5 py-3.5 text-sm text-muted-foreground">{s.enrolled}</td>
-
                   <td className="px-5 py-3.5">
                     <span className="text-sm font-semibold text-foreground">{s.number}</span>
                   </td>
 
                   <td className="px-5 py-3.5">
-                    <Badge variant="outline" className={cn("text-[11px] font-semibold", statusStyles[s.status])}>{s.status}</Badge>
+                    <Badge variant="outline" className={cn("gap-1 text-[11px] font-semibold", statusStyles[s.status])}>
+                      {s.status === "Pending" && <span className="h-1.5 w-1.5 rounded-full bg-warning animate-pulse"></span>}
+                      {s.status}
+                    </Badge>
                   </td>
 
                   <td className="px-5 py-3.5">
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => setSelectedStudent(s)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" aria-label="View account">
+                      <button 
+                        onClick={() => setSelectedStudent(s)} 
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                        title="View details"
+                      >
                         <Eye className="h-4 w-4" />
                       </button>
-                      <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground" aria-label="Edit account">
+                      <button 
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                        title="Edit"
+                      >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button onClick={() => setDeleteStudent(s)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive" aria-label="Delete account">
+                      <button 
+                        onClick={() => setDeleteStudent(s)} 
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                        title="Delete"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
@@ -308,7 +275,9 @@ export default function StudentsPage() {
 
               {!loading && paginated.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">No accounts found matching your criteria.</td>
+                  <td colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">
+                    No students found matching your criteria.
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -319,13 +288,13 @@ export default function StudentsPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-border px-5 py-3">
             <p className="text-xs text-muted-foreground">
-              Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} accounts
+              Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} students
             </p>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setPage(Math.max(1, page - 1))}
                 disabled={page === 1}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-40 disabled:pointer-events-none"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-40"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -344,7 +313,7 @@ export default function StudentsPage() {
               <button
                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                 disabled={page === totalPages}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-40 disabled:pointer-events-none"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-40"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -353,19 +322,19 @@ export default function StudentsPage() {
         )}
       </div>
 
-      {/* Account Detail Modal */}
+      {/* Student Detail Modal */}
       <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudent(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Account Profile</DialogTitle>
-            <DialogDescription>Detailed information about this account.</DialogDescription>
+            <DialogTitle>Student Profile</DialogTitle>
+            <DialogDescription>Detailed information about this student.</DialogDescription>
           </DialogHeader>
           {selectedStudent && (
             <div className="space-y-5 pt-2">
               <div className="flex items-center gap-4">
                 <Avatar className="h-14 w-14">
                   <AvatarFallback className="bg-primary/10 text-lg font-bold text-primary">
-                    {selectedStudent.name.split(" ").map((n) => n[0]).join("").slice(0,3)}
+                    {selectedStudent.name.split(" ").map((n) => n[0]).join("").slice(0,2)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
@@ -389,7 +358,7 @@ export default function StudentsPage() {
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-[11px] text-muted-foreground">Phone</p>
-                    <p className="text-sm font-medium text-foreground">{selectedStudent.phone}</p>
+                    <p className="text-sm font-medium text-foreground">{selectedStudent.phone || "Not provided"}</p>
                   </div>
                 </div>
 
@@ -412,7 +381,7 @@ export default function StudentsPage() {
 
                   <div className="flex items-center gap-3 rounded-lg bg-secondary/50 px-4 py-2.5">
                     <div className="flex h-4 w-4 items-center justify-center text-xs font-bold text-muted-foreground">
-                      #{selectedStudent.type === "Company" ? "C" : "I"}
+                      {selectedStudent.type === "Company" ? "👥" : "👤"}
                     </div>
                     <div>
                       <p className="text-[11px] text-muted-foreground">{selectedStudent.type === "Company" ? "Students" : "Seats"}</p>
@@ -426,7 +395,10 @@ export default function StudentsPage() {
                 <button className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110">
                   Edit Profile
                 </button>
-                <button onClick={() => setSelectedStudent(null)} className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary">
+                <button 
+                  onClick={() => setSelectedStudent(null)} 
+                  className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                >
                   Close
                 </button>
               </div>
@@ -439,17 +411,24 @@ export default function StudentsPage() {
       <Dialog open={!!deleteStudent} onOpenChange={() => setDeleteStudent(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Remove Account</DialogTitle>
+            <DialogTitle>Delete Student</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove <span className="font-semibold text-foreground">{deleteStudent?.name}</span>? This action cannot be undone.
+              Are you sure you want to delete <span className="font-semibold text-foreground">{deleteStudent?.name}</span>? 
+              This action cannot be undone and will also remove all associated inscriptions.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2 pt-2">
-            <button onClick={() => setDeleteStudent(null)} className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary">
+            <button 
+              onClick={() => setDeleteStudent(null)} 
+              className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            >
               Cancel
             </button>
-            <button onClick={() => setDeleteStudent(null)} className="flex-1 rounded-lg bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-all hover:brightness-110">
-              Remove
+            <button 
+              onClick={() => deleteStudent && handleDelete(deleteStudent.id)} 
+              className="flex-1 rounded-lg bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-all hover:brightness-110"
+            >
+              Delete
             </button>
           </div>
         </DialogContent>

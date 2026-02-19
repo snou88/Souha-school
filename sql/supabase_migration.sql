@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public.inscriptions (
   status TEXT DEFAULT 'Pending', -- 'Pending', 'Approved', 'Rejected'
   notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT anow()
 );
 
 -- 7) Table contact_messages

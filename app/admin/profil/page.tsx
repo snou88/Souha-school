@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, Pencil, Trash2, ShieldCheck } from "lucide-react"
+import { Plus, Pencil, Trash2, ShieldCheck, Search, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,10 +13,22 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 type Admin = {
-  id: string  // Changé de number à string pour UUID
+  id: string
   name: string
   email: string
   role?: string
@@ -25,7 +37,9 @@ type Admin = {
 
 export default function ManageAdmins() {
   const [admins, setAdmins] = useState<Admin[]>([])
+  const [filteredAdmins, setFilteredAdmins] = useState<Admin[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
   const [selectedAdmin, setSelectedAdmin] = useState<Admin | null>(null)
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
@@ -38,17 +52,33 @@ export default function ManageAdmins() {
     password: "",
   })
 
-  // Charger les admins depuis l'API
+  // Charger les admins
   useEffect(() => {
     fetchAdmins()
   }, [])
 
+  // Filtrer les admins
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredAdmins(admins)
+    } else {
+      const filtered = admins.filter(
+        admin => 
+          admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          admin.email.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      setFilteredAdmins(filtered)
+    }
+  }, [searchTerm, admins])
+
   const fetchAdmins = async () => {
     try {
-      const res = await fetch("/api/admin")  // Changé de "admins" à "admin"
+      setLoading(true)
+      const res = await fetch("/api/admin")
       const data = await res.json()
       if (data.success) {
         setAdmins(data.data)
+        setFilteredAdmins(data.data)
       } else {
         toast({
           title: "Erreur",
@@ -68,6 +98,10 @@ export default function ManageAdmins() {
     }
   }
 
+  const resetForm = () => {
+    setForm({ name: "", email: "", password: "" })
+  }
+
   // Ajouter Admin
   const handleAdd = async () => {
     if (!form.name || !form.email || !form.password) {
@@ -80,7 +114,7 @@ export default function ManageAdmins() {
     }
 
     try {
-      const res = await fetch("/api/admin", {  // Changé de "admins" à "admin"
+      const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
@@ -88,8 +122,8 @@ export default function ManageAdmins() {
       const result = await res.json()
       
       if (result.success) {
-        setAdmins((prev) => [...prev, result.data])
-        setForm({ name: "", email: "", password: "" })
+        setAdmins((prev) => [result.data, ...prev])
+        resetForm()
         setOpenAdd(false)
         toast({
           title: "Succès",
@@ -117,7 +151,7 @@ export default function ManageAdmins() {
     if (!selectedAdmin) return
 
     try {
-      const res = await fetch("/api/admin", {  // Changé de "admins" à "admin"
+      const res = await fetch("/api/admin", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -132,7 +166,7 @@ export default function ManageAdmins() {
         setAdmins((prev) => prev.map(a => a.id === selectedAdmin.id ? result.data : a))
         setOpenEdit(false)
         setSelectedAdmin(null)
-        setForm({ name: "", email: "", password: "" })
+        resetForm()
         toast({
           title: "Succès",
           description: "Administrateur modifié avec succès",
@@ -159,7 +193,7 @@ export default function ManageAdmins() {
     if (!selectedAdmin) return
 
     try {
-      const res = await fetch("/api/admin", {  // Changé de "admins" à "admin"
+      const res = await fetch("/api/admin", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: selectedAdmin.id })
@@ -205,121 +239,172 @@ export default function ManageAdmins() {
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Gestion des Admins</h1>
           <p className="text-muted-foreground text-sm">
-            Gérez les accès administrateurs
+            Gérez les accès administrateurs ({admins.length} total)
           </p>
         </div>
 
-        {/* Add Admin */}
-        <Dialog open={openAdd} onOpenChange={setOpenAdd}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus size={16} />
-              Ajouter Admin
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={fetchAdmins}
+            title="Rafraîchir"
+          >
+            <RefreshCw size={16} />
+          </Button>
 
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Ajouter un Admin</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4 py-4">
-              <Input
-                placeholder="Nom complet"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-              <Input
-                placeholder="Email"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-              <Input
-                type="password"
-                placeholder="Mot de passe"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpenAdd(false)}>
-                Annuler
+          {/* Add Admin */}
+          <Dialog open={openAdd} onOpenChange={setOpenAdd}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus size={16} />
+                Ajouter Admin
               </Button>
-              <Button onClick={handleAdd}>Créer</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Ajouter un administrateur</DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nom complet</label>
+                  <Input
+                    placeholder="Jean Dupont"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email</label>
+                  <Input
+                    placeholder="admin@exemple.com"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Mot de passe</label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => {
+                  resetForm()
+                  setOpenAdd(false)
+                }}>
+                  Annuler
+                </Button>
+                <Button onClick={handleAdd}>Créer</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Rechercher par nom ou email..."
+          className="pl-9"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {/* Admin List */}
       <div className="grid gap-4">
-        {admins.length === 0 ? (
+        {filteredAdmins.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center text-muted-foreground">
               <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium">Aucun administrateur</p>
-              <p className="text-sm mt-1">Commencez par ajouter un administrateur</p>
+              <p className="text-lg font-medium">
+                {searchTerm ? "Aucun résultat" : "Aucun administrateur"}
+              </p>
+              <p className="text-sm mt-1">
+                {searchTerm 
+                  ? "Essayez d'autres termes de recherche" 
+                  : "Commencez par ajouter un administrateur"}
+              </p>
             </CardContent>
           </Card>
         ) : (
-          admins.map((admin) => (
+          filteredAdmins.map((admin) => (
             <Card key={admin.id} className="hover:shadow-md transition">
-              <CardContent className="p-5 flex justify-between items-center">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck size={16} className="text-primary" />
-                    <h3 className="font-semibold">{admin.name}</h3>
-                    {admin.role && (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                        {admin.role}
-                      </span>
-                    )}
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {admin.name.split(" ").map(n => n[0]).join("").slice(0,2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{admin.name}</h3>
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                          {admin.role || 'Admin'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {admin.email}
+                      </p>
+                      {admin.created_at && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Inscrit le {new Date(admin.created_at).toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {admin.email}
-                  </p>
-                  {admin.created_at && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Créé le {new Date(admin.created_at).toLocaleDateString()}
-                    </p>
-                  )}
-                </div>
 
-                <div className="flex gap-2">
-                  {/* Edit */}
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedAdmin(admin)
-                      setForm({
-                        name: admin.name,
-                        email: admin.email,
-                        password: "",
-                      })
-                      setOpenEdit(true)
-                    }}
-                  >
-                    <Pencil size={16} />
-                  </Button>
+                  <div className="flex gap-2">
+                    {/* Edit */}
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedAdmin(admin)
+                        setForm({
+                          name: admin.name,
+                          email: admin.email,
+                          password: "",
+                        })
+                        setOpenEdit(true)
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </Button>
 
-                  {/* Delete */}
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={() => {
-                      setSelectedAdmin(admin)
-                      setOpenDelete(true)
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </Button>
+                    {/* Delete */}
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      onClick={() => {
+                        setSelectedAdmin(admin)
+                        setOpenDelete(true)
+                      }}
+                    >
+                      <Trash2 size={16} />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -331,28 +416,38 @@ export default function ManageAdmins() {
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Modifier Admin</DialogTitle>
+            <DialogTitle>Modifier l'administrateur</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <Input
-              placeholder="Nom complet"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-            <Input
-              placeholder="Email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-            />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nom complet</label>
+              <Input
+                placeholder="Jean Dupont"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                placeholder="admin@exemple.com"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </div>
             <p className="text-xs text-muted-foreground">
-              Laissez le mot de passe vide pour ne pas le modifier
+              Pour modifier le mot de passe, utilisez la fonction de réinitialisation.
             </p>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenEdit(false)}>
+            <Button variant="outline" onClick={() => {
+              resetForm()
+              setSelectedAdmin(null)
+              setOpenEdit(false)
+            }}>
               Annuler
             </Button>
             <Button onClick={handleEdit}>Sauvegarder</Button>
@@ -360,29 +455,27 @@ export default function ManageAdmins() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <Dialog open={openDelete} onOpenChange={setOpenDelete}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
-          </DialogHeader>
-
-          <p className="text-sm text-muted-foreground py-4">
-            Êtes-vous sûr de vouloir supprimer l'administrateur <strong>{selectedAdmin?.name}</strong> ?
-            <br />
-            Cette action est irréversible.
-          </p>
-
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setOpenDelete(false)}>
-              Annuler
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
+      {/* Delete Confirmation */}
+      <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer l'administrateur <strong>{selectedAdmin?.name}</strong> ?
+              <br />
+              <span className="text-destructive font-medium">
+                Cette action est irréversible.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               Supprimer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

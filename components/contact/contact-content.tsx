@@ -4,29 +4,28 @@ import { useState, type FormEvent } from "react";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import { sltIdentity } from "@/lib/slt-content";
 
 const contactInfo = [
   {
     icon: MapPin,
-    title: "Address",
-    lines: ["123 Education Blvd, Suite 400", "New York, NY 10001"],
+    title: "Adresse",
+    lines: [sltIdentity.address],
   },
   {
     icon: Phone,
-    title: "Phone",
-    lines: ["+1 (212) 555-1234"],
-    href: "tel:+12125551234",
+    title: "Téléphone",
+    lines: sltIdentity.phones,
   },
   {
     icon: Mail,
     title: "Email",
-    lines: ["info@apexacademy.com"],
-    href: "mailto:info@apexacademy.com",
+    lines: ["Via le formulaire de contact"],
   },
   {
     icon: Clock,
-    title: "Office Hours",
-    lines: ["Mon - Fri: 9:00 AM - 6:00 PM", "Sat: 10:00 AM - 2:00 PM"],
+    title: "Horaires",
+    lines: ["Dimanche - Jeudi : 09:00 - 18:00", "Samedi : 10:00 - 14:00"],
   },
 ];
 
@@ -51,14 +50,14 @@ export function ContactContent() {
 
   function validate(): FormErrors {
     const e: FormErrors = {};
-    if (!formData.name.trim()) e.name = "Full name is required.";
-    if (!formData.email.trim()) e.email = "Email address is required.";
+    if (!formData.name.trim()) e.name = "Le nom complet est requis.";
+    if (!formData.email.trim()) e.email = "L’adresse email est requise.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      e.email = "Please enter a valid email address.";
-    if (!formData.subject.trim()) e.subject = "Subject is required.";
-    if (!formData.message.trim()) e.message = "Message is required.";
+      e.email = "Veuillez saisir une adresse email valide.";
+    if (!formData.subject.trim()) e.subject = "L’objet est requis.";
+    if (!formData.message.trim()) e.message = "Le message est requis.";
     else if (formData.message.trim().length < 10)
-      e.message = "Message must be at least 10 characters.";
+      e.message = "Le message doit contenir au moins 10 caractères.";
     return e;
   }
 
@@ -77,14 +76,13 @@ export function ContactContent() {
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center animate-on-scroll">
           <span className="text-sm font-semibold uppercase tracking-wider text-primary">
-            Get In Touch
+            Contact
           </span>
           <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            We&apos;d Love to Hear From You
+            Échangeons sur votre besoin
           </h1>
           <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Have questions about our programs? Our team is ready to help you
-            take the next step.
+            Une question sur nos formations, séminaires ou accompagnements ? Notre équipe est à votre écoute.
           </p>
         </div>
 
@@ -135,11 +133,10 @@ export function ContactContent() {
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                   </div>
                   <h3 className="mt-6 text-xl font-bold text-foreground">
-                    Message Sent!
+                    Message envoyé
                   </h3>
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                    Thank you for reaching out. We typically respond within 24
-                    hours during business days.
+                    Merci pour votre message. Nous vous répondrons dans les meilleurs délais, généralement sous 24 heures ouvrées.
                   </p>
                   <button
                     onClick={() => {
@@ -153,7 +150,7 @@ export function ContactContent() {
                     }}
                     className="mt-6 text-sm font-semibold text-primary hover:text-primary/80"
                   >
-                    Send another message
+                    Envoyer un autre message
                   </button>
                 </div>
               ) : (
@@ -168,7 +165,7 @@ export function ContactContent() {
                         htmlFor="name"
                         className="mb-1.5 block text-sm font-medium text-foreground"
                       >
-                        Full Name
+                        Nom complet
                       </label>
                       <input
                         id="name"
@@ -181,7 +178,7 @@ export function ContactContent() {
                           "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
                           errors.name ? "border-destructive" : "border-border",
                         )}
-                        placeholder="John Doe"
+                        placeholder="Ex : Ahmed Benali"
                       />
                       {errors.name && (
                         <p className="mt-1 text-xs text-destructive">
@@ -194,7 +191,7 @@ export function ContactContent() {
                         htmlFor="email"
                         className="mb-1.5 block text-sm font-medium text-foreground"
                       >
-                        Email Address
+                        Email
                       </label>
                       <input
                         id="email"
@@ -207,7 +204,7 @@ export function ContactContent() {
                           "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
                           errors.email ? "border-destructive" : "border-border",
                         )}
-                        placeholder="john@example.com"
+                        placeholder="exemple@domaine.com"
                       />
                       {errors.email && (
                         <p className="mt-1 text-xs text-destructive">
@@ -222,7 +219,7 @@ export function ContactContent() {
                       htmlFor="subject"
                       className="mb-1.5 block text-sm font-medium text-foreground"
                     >
-                      Subject
+                      Objet
                     </label>
                     <input
                       id="subject"
@@ -235,7 +232,7 @@ export function ContactContent() {
                         "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
                         errors.subject ? "border-destructive" : "border-border",
                       )}
-                      placeholder="Inquiry about Web Development program"
+                      placeholder="Ex : Demande d’information sur une formation"
                     />
                     {errors.subject && (
                       <p className="mt-1 text-xs text-destructive">
@@ -262,7 +259,7 @@ export function ContactContent() {
                         "w-full resize-none rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
                         errors.message ? "border-destructive" : "border-border",
                       )}
-                      placeholder="Tell us how we can help you..."
+                      placeholder="Décrivez votre besoin (contexte, objectifs, public concerné, délais)…"
                     />
                     {errors.message && (
                       <p className="mt-1 text-xs text-destructive">
@@ -276,7 +273,7 @@ export function ContactContent() {
                     className="inline-flex items-center justify-center gap-2 self-start rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98]"
                   >
                     <Send className="h-4 w-4" />
-                    Send Message
+                    Envoyer le message
                   </button>
                 </form>
               )}

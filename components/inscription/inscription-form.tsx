@@ -11,11 +11,12 @@ import {
   ArrowRight,
 } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import { sltUiLabels } from "@/lib/slt-content"
 
 const steps = [
-  { id: 1, title: "Account Type", icon: GraduationCap },
-  { id: 2, title: "Details", icon: User },
-  { id: 3, title: "Program", icon: BookOpen },
+  { id: 1, title: "Type de demande", icon: GraduationCap },
+  { id: 2, title: "Coordonnées", icon: User },
+  { id: 3, title: "Formation", icon: BookOpen },
 ] as const
 
 const accountTypes = ["Individual", "Company"] as const
@@ -51,32 +52,32 @@ function validateStep(step: number, data: FormData): FormErrors {
   const errors: FormErrors = {}
 
   if (step === 1) {
-    if (!data.accountType) errors.accountType = "Please choose account type."
+    if (!data.accountType) errors.accountType = "Veuillez sélectionner le type de demande."
   }
 
   if (step === 2) {
     if (data.accountType === "Individual") {
-      if (!data.firstName.trim()) errors.firstName = "First name is required."
-      if (!data.lastName.trim()) errors.lastName = "Last name is required."
-      if (!data.email.trim()) errors.email = "Email is required."
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Invalid email address."
-      if (!data.phone.trim()) errors.phone = "Phone number is required."
-      if (!data.dateOfBirth) errors.dateOfBirth = "Date of birth is required."
+      if (!data.firstName.trim()) errors.firstName = "Le prénom est requis."
+      if (!data.lastName.trim()) errors.lastName = "Le nom est requis."
+      if (!data.email.trim()) errors.email = "L’adresse email est requise."
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Adresse email invalide."
+      if (!data.phone.trim()) errors.phone = "Le numéro de téléphone est requis."
+      if (!data.dateOfBirth) errors.dateOfBirth = "La date de naissance est requise."
     } else if (data.accountType === "Company") {
-      if (!data.companyName.trim()) errors.companyName = "Company name is required."
-      if (!data.companyPhone.trim()) errors.companyPhone = "Company phone is required."
+      if (!data.companyName.trim()) errors.companyName = "La raison sociale est requise."
+      if (!data.companyPhone.trim()) errors.companyPhone = "Le téléphone de l’entreprise est requis."
       if (!data.companyStudentCount.trim() || isNaN(Number(data.companyStudentCount)))
-        errors.companyStudentCount = "Enter a valid number of students."
-      if (!data.companyContactName.trim()) errors.companyContactName = "Contact name is required."
-      if (!data.companyContactEmail.trim()) errors.companyContactEmail = "Contact email is required."
+        errors.companyStudentCount = "Veuillez saisir un nombre valide de participants."
+      if (!data.companyContactName.trim()) errors.companyContactName = "Le nom du contact est requis."
+      if (!data.companyContactEmail.trim()) errors.companyContactEmail = "L’email du contact est requis."
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.companyContactEmail))
-        errors.companyContactEmail = "Invalid contact email address."
+        errors.companyContactEmail = "Adresse email du contact invalide."
     }
   }
 
   if (step === 3) {
-    if (!data.selectedProgram) errors.selectedProgram = "Please select a program."
-    if (!data.startDate) errors.startDate = "Preferred start date is required."
+    if (!data.selectedProgram) errors.selectedProgram = "Veuillez sélectionner une formation."
+    if (!data.startDate) errors.startDate = "Veuillez sélectionner une période souhaitée."
   }
 
   return errors
@@ -119,7 +120,7 @@ export function InscriptionForm() {
       try {
         const res = await fetch("/api/formations")
         const json = await res.json()
-        if (!json.success) throw new Error(json.error || "Failed to fetch programs")
+        if (!json.success) throw new Error(json.error || "Impossible de charger les formations")
         setPrograms(Array.isArray(json.data) ? json.data.map((f: any) => ({ id: f.id, name: f.name })) : [])
       } catch (e: any) {
         setProgramsError(e.message || "Erreur lors du chargement des programmes")
@@ -182,7 +183,7 @@ export function InscriptionForm() {
       console.log("📥 Réponse API:", responseData)
 
       if (!res.ok) {
-        throw new Error(responseData.error || "Submission failed")
+        throw new Error(responseData.error || "Échec de l’envoi de la demande")
       }
 
       // Succès !
@@ -190,7 +191,7 @@ export function InscriptionForm() {
       
     } catch (e: any) {
       console.error("❌ Erreur:", e)
-      setErrors({ form: e.message || "Network error" })
+      setErrors({ form: e.message || "Erreur réseau" })
     } finally {
       setLoading(false)
     }
@@ -225,12 +226,12 @@ export function InscriptionForm() {
     <div className="bg-secondary pb-24 pt-32">
       <div className="mx-auto max-w-3xl px-6 lg:px-8">
         <div className="text-center animate-on-scroll">
-          <span className="text-sm font-semibold uppercase tracking-wider text-primary">Enrollment</span>
+          <span className="text-sm font-semibold uppercase tracking-wider text-primary">Inscription</span>
           <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Start Your Journey
+            Déposez votre demande
           </h1>
           <p className="mt-3 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Complete your application in just a few minutes.
+            Quelques minutes suffisent pour transmettre votre demande.
           </p>
         </div>
 
@@ -287,13 +288,13 @@ export function InscriptionForm() {
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
                   <CheckCircle2 className="h-10 w-10 text-green-600" />
                 </div>
-                <h2 className="mt-6 text-2xl font-bold text-foreground">Application Submitted!</h2>
+                <h2 className="mt-6 text-2xl font-bold text-foreground">Demande envoyée</h2>
                 <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                  Thank you, {formData.accountType === "Individual" 
+                  Merci, {formData.accountType === "Individual" 
                     ? `${formData.firstName} ${formData.lastName}`.trim()
                     : formData.companyName}!
-                  Your enrollment for <span className="font-semibold text-foreground">{formData.selectedProgram}</span>{" "}
-                  has been received. A confirmation will be sent to{" "}
+                  Votre demande pour <span className="font-semibold text-foreground">{formData.selectedProgram}</span>{" "}
+                  a bien été reçue. Un accusé de réception sera envoyé à{" "}
                   <span className="font-semibold text-foreground">
                     {formData.accountType === "Individual" 
                       ? formData.email 
@@ -307,7 +308,7 @@ export function InscriptionForm() {
                 {/* STEP 1: Account Type */}
                 {currentStep === 1 && (
                   <div className="flex flex-col gap-6">
-                    <h2 className="text-xl font-bold text-foreground">Who is enrolling?</h2>
+                    <h2 className="text-xl font-bold text-foreground">Type de demande</h2>
                     <div className="grid gap-4 sm:grid-cols-2">
                       {accountTypes.map((t) => {
                         const selected = formData.accountType === t
@@ -325,11 +326,11 @@ export function InscriptionForm() {
                               {t === "Individual" ? <User className="h-5 w-5" /> : <GraduationCap className="h-5 w-5" />}
                             </div>
                             <div>
-                              <div className="font-medium text-foreground">{t}</div>
+                              <div className="font-medium text-foreground">{sltUiLabels.accountType[t]}</div>
                               <div className="text-sm text-muted-foreground">
                                 {t === "Individual"
-                                  ? "I am enrolling myself"
-                                  : "Enroll multiple employees / learners"}
+                                  ? "Demande individuelle"
+                                  : "Demande pour plusieurs collaborateurs"}
                               </div>
                             </div>
                           </button>
@@ -343,20 +344,20 @@ export function InscriptionForm() {
                 {/* STEP 2: Details (conditional) */}
                 {currentStep === 2 && (
                   <div className="flex flex-col gap-6">
-                    <h2 className="text-xl font-bold text-foreground">Details</h2>
+                    <h2 className="text-xl font-bold text-foreground">Coordonnées</h2>
 
                     {formData.accountType === "Individual" ? (
                       <>
                         <div className="grid gap-6 sm:grid-cols-2">
                           <div>
                             <label htmlFor="firstName" className="mb-1.5 block text-sm font-medium text-foreground">
-                              First Name
+                              Prénom
                             </label>
                             <input
                               id="firstName"
                               type="text"
                               className={inputClasses("firstName")}
-                              placeholder="John"
+                              placeholder="Ex : Ahmed"
                               value={formData.firstName}
                               onChange={(e) => update("firstName", e.target.value)}
                             />
@@ -364,13 +365,13 @@ export function InscriptionForm() {
                           </div>
                           <div>
                             <label htmlFor="lastName" className="mb-1.5 block text-sm font-medium text-foreground">
-                              Last Name
+                              Nom
                             </label>
                             <input
                               id="lastName"
                               type="text"
                               className={inputClasses("lastName")}
-                              placeholder="Doe"
+                              placeholder="Ex : Benali"
                               value={formData.lastName}
                               onChange={(e) => update("lastName", e.target.value)}
                             />
@@ -380,13 +381,13 @@ export function InscriptionForm() {
 
                         <div>
                           <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
-                            Email Address
+                            Email
                           </label>
                           <input
                             id="email"
                             type="email"
                             className={inputClasses("email")}
-                            placeholder="john@example.com"
+                            placeholder="exemple@domaine.com"
                             value={formData.email}
                             onChange={(e) => update("email", e.target.value)}
                           />
@@ -396,13 +397,13 @@ export function InscriptionForm() {
                         <div className="grid gap-6 sm:grid-cols-2">
                           <div>
                             <label htmlFor="phone" className="mb-1.5 block text-sm font-medium text-foreground">
-                              Phone Number
+                              Téléphone
                             </label>
                             <input
                               id="phone"
                               type="tel"
                               className={inputClasses("phone")}
-                              placeholder="+1 (555) 000-0000"
+                              placeholder="Ex : +213 5xx xx xx xx"
                               value={formData.phone}
                               onChange={(e) => update("phone", e.target.value)}
                             />
@@ -410,7 +411,7 @@ export function InscriptionForm() {
                           </div>
                           <div>
                             <label htmlFor="dateOfBirth" className="mb-1.5 block text-sm font-medium text-foreground">
-                              Date of Birth
+                              Date de naissance
                             </label>
                             <input
                               id="dateOfBirth"
@@ -430,13 +431,13 @@ export function InscriptionForm() {
                       <>
                         <div>
                           <label htmlFor="companyName" className="mb-1.5 block text-sm font-medium text-foreground">
-                            Company Name
+                            Raison sociale
                           </label>
                           <input
                             id="companyName"
                             type="text"
                             className={inputClasses("companyName")}
-                            placeholder="Acme Corp"
+                            placeholder="Ex : Société ABC"
                             value={formData.companyName}
                             onChange={(e) => update("companyName", e.target.value)}
                           />
@@ -448,13 +449,13 @@ export function InscriptionForm() {
                         <div className="grid gap-6 sm:grid-cols-2">
                           <div>
                             <label htmlFor="companyPhone" className="mb-1.5 block text-sm font-medium text-foreground">
-                              Company Phone
+                              Téléphone entreprise
                             </label>
                             <input
                               id="companyPhone"
                               type="tel"
                               className={inputClasses("companyPhone")}
-                              placeholder="+1 (555) 000-0000"
+                              placeholder="Ex : +213 2xx xx xx xx"
                               value={formData.companyPhone}
                               onChange={(e) => update("companyPhone", e.target.value)}
                             />
@@ -465,14 +466,14 @@ export function InscriptionForm() {
 
                           <div>
                             <label htmlFor="companyStudentCount" className="mb-1.5 block text-sm font-medium text-foreground">
-                              Number of Students
+                              Nombre de participants
                             </label>
                             <input
                               id="companyStudentCount"
                               type="number"
                               min={1}
                               className={inputClasses("companyStudentCount")}
-                              placeholder="e.g. 5"
+                              placeholder="Ex : 5"
                               value={formData.companyStudentCount}
                               onChange={(e) => update("companyStudentCount", e.target.value)}
                             />
@@ -485,13 +486,13 @@ export function InscriptionForm() {
                         <div className="grid gap-6 sm:grid-cols-2">
                           <div>
                             <label htmlFor="companyContactName" className="mb-1.5 block text-sm font-medium text-foreground">
-                              Contact Person
+                              Contact (nom)
                             </label>
                             <input
                               id="companyContactName"
                               type="text"
                               className={inputClasses("companyContactName")}
-                              placeholder="Jane Manager"
+                              placeholder="Ex : Responsable formation"
                               value={formData.companyContactName}
                               onChange={(e) => update("companyContactName", e.target.value)}
                             />
@@ -502,13 +503,13 @@ export function InscriptionForm() {
 
                           <div>
                             <label htmlFor="companyContactEmail" className="mb-1.5 block text-sm font-medium text-foreground">
-                              Contact Email
+                              Contact (email)
                             </label>
                             <input
                               id="companyContactEmail"
                               type="email"
                               className={inputClasses("companyContactEmail")}
-                              placeholder="contact@company.com"
+                              placeholder="contact@entreprise.com"
                               value={formData.companyContactEmail}
                               onChange={(e) => update("companyContactEmail", e.target.value)}
                             />
@@ -525,10 +526,10 @@ export function InscriptionForm() {
                 {/* STEP 3: Program Selection */}
                 {currentStep === 3 && (
                   <div className="flex flex-col gap-6">
-                    <h2 className="text-xl font-bold text-foreground">Select Your Program</h2>
+                    <h2 className="text-xl font-bold text-foreground">Choisir une formation</h2>
                     <div>
                       <label htmlFor="selectedProgram" className="mb-1.5 block text-sm font-medium text-foreground">
-                        Training Program
+                        Formation
                       </label>
                       <select
                         id="selectedProgram"
@@ -536,11 +537,11 @@ export function InscriptionForm() {
                         value={formData.selectedProgram}
                         onChange={(e) => update("selectedProgram", e.target.value)}
                       >
-                        <option value="">Choose a program</option>
-                        {programsLoading && <option disabled>Loading programs...</option>}
-                        {programsError && <option disabled>Error loading programs</option>}
+                        <option value="">Sélectionner une formation</option>
+                        {programsLoading && <option disabled>Chargement…</option>}
+                        {programsError && <option disabled>Erreur de chargement</option>}
                         {!programsLoading && !programsError && programs.length === 0 && (
-                          <option disabled>No programs available</option>
+                          <option disabled>Aucune formation disponible</option>
                         )}
                         {!programsLoading && !programsError &&
                           programs.map((p) => (
@@ -553,7 +554,7 @@ export function InscriptionForm() {
                     </div>
                     <div>
                       <label htmlFor="startDate" className="mb-1.5 block text-sm font-medium text-foreground">
-                        Preferred Start Date
+                        Période souhaitée
                       </label>
                       <select
                         id="startDate"
@@ -561,11 +562,11 @@ export function InscriptionForm() {
                         value={formData.startDate}
                         onChange={(e) => update("startDate", e.target.value)}
                       >
-                        <option value="">Select a cohort</option>
-                        <option value="March 2026">March 2026</option>
-                        <option value="June 2026">June 2026</option>
-                        <option value="September 2026">September 2026</option>
-                        <option value="January 2027">January 2027</option>
+                        <option value="">Sélectionner une période</option>
+                        <option value="Mars 2026">Mars 2026</option>
+                        <option value="Juin 2026">Juin 2026</option>
+                        <option value="Septembre 2026">Septembre 2026</option>
+                        <option value="Janvier 2027">Janvier 2027</option>
                       </select>
                       {errors.startDate && <p className="mt-1 text-xs text-destructive">{errors.startDate}</p>}
                     </div>
@@ -582,7 +583,7 @@ export function InscriptionForm() {
                       className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-secondary active:scale-[0.98]"
                     >
                       <ArrowLeft className="h-4 w-4" />
-                      Back
+                      Retour
                     </button>
                   ) : (
                     <div />
@@ -593,7 +594,11 @@ export function InscriptionForm() {
                     disabled={loading}
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {currentStep === steps.length ? (loading ? "Submitting..." : "Submit Application") : "Continue"}
+                    {currentStep === steps.length
+                      ? loading
+                        ? "Envoi…"
+                        : "Envoyer la demande"
+                      : "Continuer"}
                     {currentStep < steps.length && <ArrowRight className="h-4 w-4" />}
                   </button>
                 </div>

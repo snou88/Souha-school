@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { sltUiLabels } from "@/lib/slt-content"
 
 interface Inscription {
   id: number
@@ -173,7 +174,7 @@ export default function InscriptionsAdminPage() {
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-sm text-muted-foreground">Loading inscriptions...</p>
+          <p className="mt-4 text-sm text-muted-foreground">Chargement des inscriptions…</p>
         </div>
       </div>
     )
@@ -187,7 +188,7 @@ export default function InscriptionsAdminPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Inscriptions</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Review and manage enrollment requests
+            Examiner et gérer les demandes d’inscription
           </p>
         </div>
       </div>
@@ -196,9 +197,9 @@ export default function InscriptionsAdminPage() {
       <div className="grid gap-3 sm:grid-cols-4">
         {[
           { label: "Total", value: counts.total, color: "bg-primary/10 text-primary" },
-          { label: "Pending", value: counts.pending, color: "bg-warning/10 text-warning" },
-          { label: "Approved", value: counts.approved, color: "bg-success/10 text-success" },
-          { label: "Rejected", value: counts.rejected, color: "bg-destructive/10 text-destructive" },
+          { label: "En attente", value: counts.pending, color: "bg-warning/10 text-warning" },
+          { label: "Approuvées", value: counts.approved, color: "bg-success/10 text-success" },
+          { label: "Rejetées", value: counts.rejected, color: "bg-destructive/10 text-destructive" },
         ].map((c) => (
           <div key={c.label} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
             <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold", c.color)}>
@@ -215,7 +216,7 @@ export default function InscriptionsAdminPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by name or formation..."
+            placeholder="Rechercher par nom ou formation…"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             className="h-9 w-full rounded-lg border border-input bg-card pl-9 pr-4 text-sm outline-none focus:border-primary"
@@ -224,24 +225,24 @@ export default function InscriptionsAdminPage() {
 
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
           <SelectTrigger className="h-9 w-36 text-sm">
-            <SelectValue placeholder="All Statuses" />
+            <SelectValue placeholder="Tous les statuts" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="Pending">Pending</SelectItem>
-            <SelectItem value="Approved">Approved</SelectItem>
-            <SelectItem value="Rejected">Rejected</SelectItem>
+            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="Pending">En attente</SelectItem>
+            <SelectItem value="Approved">Approuvées</SelectItem>
+            <SelectItem value="Rejected">Rejetées</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1) }}>
           <SelectTrigger className="h-9 w-36 text-sm">
-            <SelectValue placeholder="All Types" />
+            <SelectValue placeholder="Tous les types" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="Individual">Individual</SelectItem>
-            <SelectItem value="Company">Company</SelectItem>
+            <SelectItem value="all">Tous les types</SelectItem>
+            <SelectItem value="Individual">Particulier</SelectItem>
+            <SelectItem value="Company">Entreprise</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -252,11 +253,11 @@ export default function InscriptionsAdminPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-secondary/30">
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Account</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Compte</th>
                 <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Formation</th>
                 <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Date</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Number</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Nombre</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Statut</th>
                 <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -264,7 +265,7 @@ export default function InscriptionsAdminPage() {
               {paginated.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
-                    No inscriptions found
+                    Aucune inscription trouvée
                   </td>
                 </tr>
               ) : (
@@ -291,7 +292,7 @@ export default function InscriptionsAdminPage() {
                                     : "bg-secondary text-muted-foreground border-border"
                                 )}
                               >
-                                {row.type}
+                                {sltUiLabels.accountType[row.type] ?? row.type}
                               </Badge>
                             </div>
                             <p className="text-[11px] text-muted-foreground">{row.email}</p>
@@ -306,7 +307,7 @@ export default function InscriptionsAdminPage() {
                       <td className="px-5 py-3.5">
                         <Badge variant="outline" className={cn("gap-1 text-[11px] font-semibold", statusStyles[row.status])}>
                           <StatusIcon className="h-3 w-3" />
-                          {row.status}
+                          {sltUiLabels.status[row.status] ?? row.status}
                         </Badge>
                       </td>
 
@@ -319,14 +320,14 @@ export default function InscriptionsAdminPage() {
                                 className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-success hover:bg-success/10"
                               >
                                 <Check className="h-3.5 w-3.5" />
-                                Approve
+                                Approuver
                               </button>
                               <button 
                                 onClick={() => handleReject(row.id)} 
                                 className="inline-flex h-8 items-center gap-1 rounded-lg px-2.5 text-xs font-medium text-destructive hover:bg-destructive/10"
                               >
                                 <X className="h-3.5 w-3.5" />
-                                Reject
+                                Rejeter
                               </button>
                             </>
                           )}
@@ -350,7 +351,7 @@ export default function InscriptionsAdminPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-border px-5 py-3">
             <p className="text-xs text-muted-foreground">
-              Showing {((page - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} results
+              Affichage {((page - 1) * ITEMS_PER_PAGE) + 1} à {Math.min(page * ITEMS_PER_PAGE, filtered.length)} sur {filtered.length}
             </p>
             <div className="flex gap-1">
               <button

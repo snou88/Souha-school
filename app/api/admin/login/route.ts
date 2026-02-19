@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     if (!email || !password) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Email and password are required' 
+        error: "L’email et le mot de passe sont requis."
       }, { status: 400 })
     }
 
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       console.log("❌ Admin non trouvé")
       return NextResponse.json({ 
         success: false, 
-        error: 'Invalid credentials' 
+        error: "Identifiants invalides."
       }, { status: 401 })
     }
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       console.log("❌ Mot de passe invalide")
       return NextResponse.json({ 
         success: false, 
-        error: 'Invalid credentials' 
+        error: "Identifiants invalides."
       }, { status: 401 })
     }
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
     const sessionString = Buffer.from(JSON.stringify(sessionData)).toString('base64')
 
-    // Définir le cookie - ATTENTION: on doit attendre cookies()
+    // Définir le cookie
     const cookieStore = await cookies()
     cookieStore.set('admin_session', sessionString, {
       httpOnly: true,
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     console.error('❌ Login error:', err)
     return NextResponse.json({ 
       success: false, 
-      error: 'Internal server error' 
+      error: "Erreur interne du serveur"
     }, { status: 500 })
   }
 }
@@ -120,17 +120,28 @@ export async function GET() {
 export async function DELETE() {
   try {
     const cookieStore = await cookies()
+    
+    // Supprimer le cookie de session
     cookieStore.delete('admin_session')
     
+    // Aussi définir un cookie expiré (solution de secours)
+    cookieStore.set('admin_session', '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    })
+
     return NextResponse.json({ 
       success: true,
-      message: 'Logged out successfully' 
+      message: "Déconnexion effectuée avec succès."
     })
   } catch (err) {
     console.error('Logout error:', err)
     return NextResponse.json({ 
       success: false, 
-      error: 'Internal server error' 
+      error: "Erreur interne du serveur"
     }, { status: 500 })
   }
 }

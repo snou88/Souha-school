@@ -29,7 +29,7 @@ export async function GET() {
   } catch (err) {
     console.error("Unexpected GET error:", err)
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     // Validation obligatoire
     if (!name || !duration) {
       return NextResponse.json(
-        { success: false, error: "Name and duration are required" },
+        { success: false, error: "Le nom et la durée sont requis." },
         { status: 400 }
       )
     }
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("Unexpected POST error:", err)
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }
@@ -94,7 +94,7 @@ export async function PUT(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: "ID is required" },
+        { success: false, error: "L’identifiant est requis." },
         { status: 400 }
       )
     }
@@ -128,7 +128,7 @@ export async function PUT(request: Request) {
   } catch (err) {
     console.error("Unexpected PUT error:", err)
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }
@@ -144,7 +144,7 @@ export async function DELETE(request: Request) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: "ID is required" },
+        { success: false, error: "L’identifiant est requis." },
         { status: 400 }
       )
     }
@@ -166,7 +166,7 @@ export async function DELETE(request: Request) {
   } catch (err) {
     console.error("Unexpected DELETE error:", err)
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Erreur interne du serveur" },
       { status: 500 }
     )
   }

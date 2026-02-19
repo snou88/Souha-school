@@ -27,7 +27,7 @@ export default function FormationCard({ formation }: Props) {
 
   async function handleEnroll() {
     if (!user) {
-      window.location.href = '/admin/login'
+      window.location.href = '/inscription'
       return
     }
 
@@ -47,30 +47,36 @@ export default function FormationCard({ formation }: Props) {
       })
       const json = await res.json()
       if (!res.ok) {
-        setMessage(json?.error || 'Enrollment failed')
+        setMessage(json?.error || "Échec de l’inscription")
       } else {
-        setMessage('Enrolled successfully')
+        setMessage("Inscription enregistrée")
       }
     } catch (err: any) {
-      setMessage(err?.message || 'Unknown error')
+      setMessage(err?.message || "Erreur inattendue")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="card">
-      <h3>{formation.title}</h3>
-      <p>{formation.description}</p>
-      <div>
-        <small>Starts: {formation.start_date ?? 'TBD'}</small>
+    <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+      <h3 className="text-lg font-semibold text-foreground">{formation.title}</h3>
+      {formation.description && (
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{formation.description}</p>
+      )}
+      <div className="mt-4 text-xs text-muted-foreground">
+        Début : <span className="font-medium text-foreground">{formation.start_date ?? "À définir"}</span>
       </div>
-      <div style={{ marginTop: 8 }}>
-        <button onClick={handleEnroll} disabled={loading}>
-          {loading ? 'Enrolling…' : 'Enroll'}
+      <div className="mt-5">
+        <button
+          onClick={handleEnroll}
+          disabled={loading}
+          className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? "Traitement…" : "Demander une inscription"}
         </button>
       </div>
-      {message && <div style={{ marginTop: 8 }}>{message}</div>}
+      {message && <div className="mt-3 text-sm text-muted-foreground">{message}</div>}
     </div>
   )
 }

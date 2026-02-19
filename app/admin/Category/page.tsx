@@ -368,7 +368,7 @@ export default function CategoriesAdminPage() {
                 value={formValues.name}
                 onChange={(e) => handleChange("name", e.target.value)}
                 className="mt-1.5 h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="Ex: Development"
+                placeholder="Ex : Informatique"
               />
             </div>
 
@@ -378,21 +378,21 @@ export default function CategoriesAdminPage() {
                 value={formValues.slug}
                 onChange={(e) => handleChange("slug", e.target.value)}
                 className="mt-1.5 h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                placeholder="ex: development"
+                placeholder="ex : informatique"
               />
               <p className="mt-1 text-xs text-muted-foreground">Si laissé vide, le slug sera généré automatiquement.</p>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground">Status</label>
+              <label className="text-sm font-medium text-foreground">Statut</label>
               <select
                 value={formValues.status}
                 onChange={(e) => handleChange("status", e.target.value)}
                 className="mt-1.5 h-11 w-full rounded-xl border border-input bg-background px-4 text-sm text-foreground"
               >
-                <option>Active</option>
-                <option>Draft</option>
-                <option>Archived</option>
+                <option value="Active">Actif</option>
+                <option value="Draft">Brouillon</option>
+                <option value="Archived">Archivé</option>
               </select>
             </div>
 

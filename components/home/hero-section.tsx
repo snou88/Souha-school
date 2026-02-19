@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { ArrowRight, Play } from "lucide-react"
+import { sltHomeContent } from "@/lib/slt-content"
 
 export function HeroSection() {
   return (
@@ -19,18 +20,17 @@ export function HeroSection() {
             <div className="animate-fade-in-up">
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                Enrollment Open for 2026
+                {sltHomeContent.hero.pill}
               </span>
             </div>
 
             <h1 className="mt-8 text-balance text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl animate-fade-in-up [animation-delay:100ms]">
-              Build Your Future with
-              <span className="text-primary"> Professional Training</span>
+              {sltHomeContent.hero.title}
+              <span className="text-primary"> {sltHomeContent.hero.titleAccent}</span>
             </h1>
 
             <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground animate-fade-in-up [animation-delay:200ms]">
-              Gain in-demand skills through hands-on programs designed by industry experts. 
-              Join thousands of graduates who transformed their careers at SLT Academy.
+              {sltHomeContent.hero.lead}
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-4 animate-fade-in-up [animation-delay:300ms]">
@@ -38,7 +38,7 @@ export function HeroSection() {
                 href="/formations"
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-lg hover:brightness-110 active:scale-[0.98]"
               >
-                View Programs
+                {sltHomeContent.hero.primaryCta}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -46,7 +46,7 @@ export function HeroSection() {
                 className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-6 py-3.5 text-sm font-semibold text-foreground shadow-sm transition-all hover:bg-secondary active:scale-[0.98]"
               >
                 <Play className="h-4 w-4" />
-                Enroll Now
+                {sltHomeContent.hero.secondaryCta}
               </Link>
             </div>
 
@@ -63,8 +63,8 @@ export function HeroSection() {
                 ))}
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">2,500+ Graduates</p>
-                <p className="text-xs text-muted-foreground">Trusted by leading companies worldwide</p>
+                <p className="text-sm font-semibold text-foreground">{sltHomeContent.hero.proofTitle}</p>
+                <p className="text-xs text-muted-foreground">{sltHomeContent.hero.proofSubtitle}</p>
               </div>
             </div>
           </div>
@@ -75,12 +75,7 @@ export function HeroSection() {
               {/* Main card */}
               <div className="rounded-2xl border border-border bg-card p-8 shadow-lg animate-fade-in-up [animation-delay:200ms]">
                 <div className="grid grid-cols-2 gap-8">
-                  {[
-                    { value: "95%", label: "Employment Rate" },
-                    { value: "50+", label: "Expert Instructors" },
-                    { value: "30+", label: "Training Programs" },
-                    { value: "4.9", label: "Student Rating" },
-                  ].map((stat) => (
+                  {sltHomeContent.hero.stats.map((stat) => (
                     <div key={stat.label} className="text-center">
                       <p className="text-3xl font-bold text-primary">{stat.value}</p>
                       <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
@@ -98,8 +93,8 @@ export function HeroSection() {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Certified Programs</p>
-                    <p className="text-xs text-muted-foreground">Internationally recognized</p>
+                    <p className="text-sm font-semibold text-foreground">{sltHomeContent.hero.certifiedTitle}</p>
+                    <p className="text-xs text-muted-foreground">{sltHomeContent.hero.certifiedSubtitle}</p>
                   </div>
                 </div>
               </div>

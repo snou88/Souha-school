@@ -6,7 +6,7 @@ import { ContactContent } from "@/components/contact/contact-content"
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Get in touch with SLT Academy. We're here to answer your questions about our programs, enrollment, and career support.",
+    "Contactez-nous pour toute demande d’information sur nos formations, séminaires, team building et services d’accompagnement.",
 }
 
 export default function ContactPage() {

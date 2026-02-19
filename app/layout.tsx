@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { sltIdentity } from "@/lib/slt-content"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,11 +10,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "SLT Academy | Professional Training School",
-    template: "%s | SLT Academy",
+    default: `${sltIdentity.officialName} | Centre de formation professionnelle`,
+    template: `%s | ${sltIdentity.officialName}`,
   },
   description:
-    "Build your future with professional training programs. SLT Academy offers industry-leading courses designed to accelerate your career.",
+    sltIdentity.description,
 }
 
 export const viewport: Viewport = {
@@ -28,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="fr" className={inter.variable}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   )

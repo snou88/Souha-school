@@ -7,26 +7,26 @@ import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 const programs = [
   {
     icon: Code,
-    title: "Full-Stack Web Development",
+    title: "Développement web full-stack",
     description:
-      "Master front-end and back-end technologies to build modern, scalable web applications from scratch.",
-    duration: "6 Months",
-    category: "Technology",
+      "Acquérez des compétences front-end et back-end pour concevoir des applications web modernes et évolutives.",
+    duration: "6 mois",
+    category: "Technologie",
   },
   {
     icon: BarChart3,
-    title: "Data Science & Analytics",
+    title: "Data science & analytique",
     description:
-      "Learn Python, machine learning, and data visualization to extract insights from complex datasets.",
-    duration: "5 Months",
-    category: "Data",
+      "Python, visualisation et bases du machine learning pour transformer les données en décisions.",
+    duration: "5 mois",
+    category: "Données",
   },
   {
     icon: Palette,
-    title: "UX/UI Design Mastery",
+    title: "UX/UI design",
     description:
-      "Create beautiful, user-centered digital products using Figma, research methods, and design systems.",
-    duration: "4 Months",
+      "Concevez des produits numériques centrés utilisateur avec des méthodes et outils de conception.",
+    duration: "4 mois",
     category: "Design",
   },
 ]
@@ -40,20 +40,20 @@ export function FeaturedPrograms() {
         <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end animate-on-scroll">
           <div className="max-w-xl">
             <span className="text-sm font-semibold uppercase tracking-wider text-primary">
-              Featured Programs
+              Sélection
             </span>
             <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              Start Learning Today
+              Commencez dès aujourd’hui
             </h2>
             <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-              Explore our most popular training programs trusted by thousands of professionals.
+              Découvrez une sélection de parcours parmi les plus demandés.
             </p>
           </div>
           <Link
             href="/formations"
             className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
           >
-            View All Programs
+          Voir toutes les formations
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -91,7 +91,7 @@ export function FeaturedPrograms() {
                     href="/formations"
                     className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
                   >
-                    Learn More
+                    En savoir plus
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>

@@ -139,7 +139,7 @@ export function StatCards() {
 
   const cards = [
     {
-      label: "Total Students",
+      label: "Total apprenants",
       value: stats.totalStudents,
       change: studentTrend.value,
       trend: studentTrend.trend,
@@ -148,7 +148,7 @@ export function StatCards() {
       bgColor: "bg-primary/10",
     },
     {
-      label: "Total Companies",
+      label: "Entreprises",
       value: stats.totalCompanies,
       change: companyTrend.value,
       trend: companyTrend.trend,
@@ -157,17 +157,17 @@ export function StatCards() {
       bgColor: "bg-chart-4/10",
     },
     {
-      label: "Total Inscriptions",
+      label: "Inscriptions",
       value: stats.totalInscriptions,
       change: inscriptionTrend.value,
       trend: inscriptionTrend.trend,
       icon: ClipboardList,
       color: "text-chart-2",
       bgColor: "bg-chart-2/10",
-      subtext: `${stats.pendingInscriptions} pending`
+      subtext: `${stats.pendingInscriptions} en attente`
     },
     {
-      label: "Active Formations",
+      label: "Formations actives",
       value: stats.totalFormations,
       change: formationTrend.value,
       trend: formationTrend.trend,
@@ -204,7 +204,7 @@ export function StatCards() {
                 >
                   {stat.change}
                 </span>
-                <span className="text-xs text-muted-foreground">vs last month</span>
+                <span className="text-xs text-muted-foreground">vs mois précédent</span>
               </div>
               {stat.subtext && (
                 <p className="mt-1 text-xs text-muted-foreground">{stat.subtext}</p>

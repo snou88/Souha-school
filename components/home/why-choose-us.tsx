@@ -2,32 +2,16 @@
 
 import { BookOpen, Users, Award, Briefcase } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import { sltHomeContent } from "@/lib/slt-content"
 
 const features = [
-  {
-    icon: BookOpen,
-    title: "Expert-Led Curriculum",
-    description:
-      "Courses designed and taught by industry professionals with years of real-world experience.",
-  },
-  {
-    icon: Users,
-    title: "Small Class Sizes",
-    description:
-      "Personalized attention with a maximum of 20 students per session to ensure effective learning.",
-  },
-  {
-    icon: Award,
-    title: "Recognized Certifications",
-    description:
-      "Earn internationally accredited certificates that boost your professional credibility.",
-  },
-  {
-    icon: Briefcase,
-    title: "Career Support",
-    description:
-      "Dedicated placement assistance with 200+ partner companies hiring our graduates.",
-  },
+  { icon: Award, ...sltHomeContent.whyUs.items[0] },
+  { icon: Users, ...sltHomeContent.whyUs.items[1] },
+  { icon: BookOpen, ...sltHomeContent.whyUs.items[2] },
+  { icon: Briefcase, ...sltHomeContent.whyUs.items[3] },
+  // Les 2 autres points restent dans la même section pour respecter les exigences.
+  { icon: BookOpen, ...sltHomeContent.whyUs.items[4] },
+  { icon: Award, ...sltHomeContent.whyUs.items[5] },
 ]
 
 export function WhyChooseUs() {
@@ -38,13 +22,13 @@ export function WhyChooseUs() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center animate-on-scroll">
           <span className="text-sm font-semibold uppercase tracking-wider text-primary">
-            Why Apex Academy
+            {sltHomeContent.whyUs.eyebrow}
           </span>
           <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Everything You Need to Succeed
+            {sltHomeContent.whyUs.title}
           </h2>
           <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-            We combine cutting-edge curriculum with hands-on practice and real industry connections.
+            {sltHomeContent.whyUs.lead}
           </p>
         </div>
 

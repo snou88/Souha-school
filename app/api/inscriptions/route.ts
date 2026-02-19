@@ -37,7 +37,7 @@ export async function GET() {
       name: item.students?.name || '',
       email: item.students?.email || '',
       formation: item.formations?.name || '',
-      date: new Date(item.created_at).toLocaleDateString('en-US', { 
+      date: new Date(item.created_at).toLocaleDateString('fr-FR', {
         year: 'numeric', 
         month: 'long' 
       }),
@@ -48,7 +48,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: formattedData })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     if (!name || !email || !formation) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Name, email and formation are required' 
+        error: "Le nom, l’email et la formation sont requis."
       }, { status: 400 })
     }
 
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     if (formationError || !formationData) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Formation not found' 
+        error: "Formation introuvable."
       }, { status: 404 })
     }
 
@@ -133,7 +133,7 @@ export async function POST(request: Request) {
     console.error('Unexpected error:', err)
     return NextResponse.json({ 
       success: false, 
-      error: 'Internal server error' 
+      error: "Erreur interne du serveur"
     }, { status: 500 })
   }
 }
@@ -145,7 +145,7 @@ export async function PUT(request: Request) {
     const { id, status } = body
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "L’identifiant est requis." }, { status: 400 })
     }
 
     // Mettre à jour l'inscription
@@ -189,7 +189,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: true, data: inscription })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -200,7 +200,7 @@ export async function DELETE(request: Request) {
     const { id } = body
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "L’identifiant est requis." }, { status: 400 })
     }
 
     // Récupérer le student_id associé
@@ -236,6 +236,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }

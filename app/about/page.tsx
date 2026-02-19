@@ -4,9 +4,9 @@ import { Footer } from "@/components/footer"
 import { AboutContent } from "@/components/about/about-content"
 
 export const metadata: Metadata = {
-  title: "About Us",
+  title: "À propos",
   description:
-    "Learn about SLT Academy's mission, values, and the team behind our world-class professional training programs.",
+    "Présentation de Souha School OF Languages and Training, établissement privé agréé spécialisé dans la formation professionnelle.",
 }
 
 export default function AboutPage() {

@@ -3,8 +3,8 @@ import { RecentInscriptions } from "@/components/admin/dashboard/recent-inscript
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Dashboard | SLT Admin",
-  description: "Admin dashboard overview for SLT Academy",
+  title: "Tableau de bord | Administration",
+  description: "Aperçu du tableau de bord d’administration",
 }
 
 export default function AdminDashboardPage() {
@@ -12,8 +12,8 @@ export default function AdminDashboardPage() {
     <div className="mx-auto max-w-7xl space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Welcome back, Admin. Here is your academy overview.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tableau de bord</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Bienvenue. Voici un aperçu de l’activité récente.</p>
       </div>
       <StatCards />
 

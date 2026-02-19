@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { sltUiLabels } from "@/lib/slt-content"
 import {
   Dialog,
   DialogContent,
@@ -128,9 +129,9 @@ export default function StudentsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Students</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Apprenants</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage students and companies ({students.length} total)
+            Gérer les apprenants et entreprises ({students.length} au total)
           </p>
         </div>
       </div>
@@ -141,7 +142,7 @@ export default function StudentsPage() {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by name, email, or formation..."
+            placeholder="Rechercher par nom, email ou formation…"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             className="h-9 w-full rounded-lg border border-input bg-card pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 sm:max-w-sm"
@@ -149,17 +150,16 @@ export default function StudentsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-muted-foreground" />
           <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as any); setPage(1) }}>
             <SelectTrigger className="h-9 w-40 text-sm">
-              <SelectValue placeholder="All Statuses" />
+              <SelectValue placeholder="Tous les statuts" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="Active">Active</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Inactive">Inactive</SelectItem>
-              <SelectItem value="Graduated">Graduated</SelectItem>
+              <SelectItem value="all">Tous les statuts</SelectItem>
+              <SelectItem value="Active">Actif</SelectItem>
+              <SelectItem value="Pending">En attente</SelectItem>
+              <SelectItem value="Inactive">Inactif</SelectItem>
+              <SelectItem value="Graduated">Diplômé</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -167,12 +167,12 @@ export default function StudentsPage() {
         <div className="flex items-center gap-2">
           <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v as any); setPage(1) }}>
             <SelectTrigger className="h-9 w-36 text-sm">
-              <SelectValue placeholder="All Types" />
+              <SelectValue placeholder="Tous les types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="Individual">Individual</SelectItem>
-              <SelectItem value="Company">Company</SelectItem>
+              <SelectItem value="all">Tous les types</SelectItem>
+              <SelectItem value="Individual">Particulier</SelectItem>
+              <SelectItem value="Company">Entreprise</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -184,11 +184,11 @@ export default function StudentsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-secondary/30">
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Student</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Apprenant</th>
                 <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Formation</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Enrolled</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Seats</th>
-                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Inscription</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Places</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Statut</th>
                 <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -199,7 +199,7 @@ export default function StudentsPage() {
                     <div className="flex justify-center">
                       <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
                     </div>
-                    <p className="mt-2">Loading students...</p>
+                    <p className="mt-2">Chargement des apprenants…</p>
                   </td>
                 </tr>
               )}
@@ -225,7 +225,7 @@ export default function StudentsPage() {
                                 : "bg-secondary text-muted-foreground border-border"
                             )}
                           >
-                            {s.type}
+                            {sltUiLabels.accountType[s.type] ?? s.type}
                           </Badge>
                         </div>
                         <p className="text-[11px] text-muted-foreground">{s.email}</p>
@@ -242,7 +242,7 @@ export default function StudentsPage() {
                   <td className="px-5 py-3.5">
                     <Badge variant="outline" className={cn("gap-1 text-[11px] font-semibold", statusStyles[s.status])}>
                       {s.status === "Pending" && <span className="h-1.5 w-1.5 rounded-full bg-warning animate-pulse"></span>}
-                      {s.status}
+                      {sltUiLabels.status[s.status] ?? s.status}
                     </Badge>
                   </td>
 
@@ -251,20 +251,20 @@ export default function StudentsPage() {
                       <button 
                         onClick={() => setSelectedStudent(s)} 
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                        title="View details"
+                        title="Voir les détails"
                       >
                         <Eye className="h-4 w-4" />
                       </button>
                       <button 
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                        title="Edit"
+                        title="Modifier"
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button 
                         onClick={() => setDeleteStudent(s)} 
                         className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                        title="Delete"
+                        title="Supprimer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -276,7 +276,7 @@ export default function StudentsPage() {
               {!loading && paginated.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-sm text-muted-foreground">
-                    No students found matching your criteria.
+                    Aucun apprenant ne correspond à vos critères.
                   </td>
                 </tr>
               )}
@@ -288,7 +288,7 @@ export default function StudentsPage() {
         {totalPages > 1 && (
           <div className="flex items-center justify-between border-t border-border px-5 py-3">
             <p className="text-xs text-muted-foreground">
-              Showing {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} students
+              Affichage {(page - 1) * ITEMS_PER_PAGE + 1} à {Math.min(page * ITEMS_PER_PAGE, filtered.length)} sur {filtered.length}
             </p>
             <div className="flex items-center gap-1">
               <button
@@ -326,8 +326,8 @@ export default function StudentsPage() {
       <Dialog open={!!selectedStudent} onOpenChange={() => setSelectedStudent(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Student Profile</DialogTitle>
-            <DialogDescription>Detailed information about this student.</DialogDescription>
+            <DialogTitle>Fiche apprenant</DialogTitle>
+            <DialogDescription>Informations détaillées.</DialogDescription>
           </DialogHeader>
           {selectedStudent && (
             <div className="space-y-5 pt-2">
@@ -340,7 +340,7 @@ export default function StudentsPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">{selectedStudent.name}</h3>
                   <Badge variant="outline" className={cn("mt-1 text-[11px] font-semibold", statusStyles[selectedStudent.status])}>
-                    {selectedStudent.status}
+                    {sltUiLabels.status[selectedStudent.status] ?? selectedStudent.status}
                   </Badge>
                 </div>
               </div>
@@ -357,8 +357,8 @@ export default function StudentsPage() {
                 <div className="flex items-center gap-3 rounded-lg bg-secondary/50 px-4 py-2.5">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-[11px] text-muted-foreground">Phone</p>
-                    <p className="text-sm font-medium text-foreground">{selectedStudent.phone || "Not provided"}</p>
+                    <p className="text-[11px] text-muted-foreground">Téléphone</p>
+                    <p className="text-sm font-medium text-foreground">{selectedStudent.phone || "Non renseigné"}</p>
                   </div>
                 </div>
 
@@ -374,7 +374,7 @@ export default function StudentsPage() {
                   <div className="flex items-center gap-3 rounded-lg bg-secondary/50 px-4 py-2.5">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-[11px] text-muted-foreground">Enrolled</p>
+                      <p className="text-[11px] text-muted-foreground">Inscription</p>
                       <p className="text-sm font-medium text-foreground">{selectedStudent.enrolled}</p>
                     </div>
                   </div>
@@ -384,7 +384,7 @@ export default function StudentsPage() {
                       {selectedStudent.type === "Company" ? "👥" : "👤"}
                     </div>
                     <div>
-                      <p className="text-[11px] text-muted-foreground">{selectedStudent.type === "Company" ? "Students" : "Seats"}</p>
+                      <p className="text-[11px] text-muted-foreground">{selectedStudent.type === "Company" ? "Participants" : "Places"}</p>
                       <p className="text-sm font-semibold text-foreground">{selectedStudent.number}</p>
                     </div>
                   </div>
@@ -393,13 +393,13 @@ export default function StudentsPage() {
 
               <div className="flex gap-2 pt-1">
                 <button className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110">
-                  Edit Profile
+                  Modifier
                 </button>
                 <button 
                   onClick={() => setSelectedStudent(null)} 
                   className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                 >
-                  Close
+                  Fermer
                 </button>
               </div>
             </div>
@@ -411,10 +411,10 @@ export default function StudentsPage() {
       <Dialog open={!!deleteStudent} onOpenChange={() => setDeleteStudent(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Delete Student</DialogTitle>
+            <DialogTitle>Supprimer l’apprenant</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <span className="font-semibold text-foreground">{deleteStudent?.name}</span>? 
-              This action cannot be undone and will also remove all associated inscriptions.
+              Confirmez-vous la suppression de <span className="font-semibold text-foreground">{deleteStudent?.name}</span> ?
+              Cette action est irréversible et supprimera également les inscriptions associées.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2 pt-2">
@@ -422,13 +422,13 @@ export default function StudentsPage() {
               onClick={() => setDeleteStudent(null)} 
               className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
             >
-              Cancel
+              Annuler
             </button>
             <button 
               onClick={() => deleteStudent && handleDelete(deleteStudent.id)} 
               className="flex-1 rounded-lg bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-all hover:brightness-110"
             >
-              Delete
+              Supprimer
             </button>
           </div>
         </DialogContent>

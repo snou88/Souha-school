@@ -25,12 +25,10 @@ export default function PartnersSection() {
       {/* Title */}
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
         <h2 className="text-balance text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
-          Our Trusted Partners
+          Nos partenaires de confiance
         </h2>
         <p className="mx-auto mt-6 max-w-3xl text-pretty text-lg leading-relaxed text-gray-600">
-          We collaborate with industry-leading companies to provide real-world
-          opportunities and career pathways for our students. Our partnerships
-          drive innovation and excellence in education.
+          Nous collaborons avec des entreprises leaders dans leur secteur afin d’offrir à nos étudiants des opportunités concrètes et des parcours professionnels adaptés au monde réel. Nos partenariats favorisent l’innovation et l’excellence dans l’éducation.
         </p>
       </div>
 
@@ -76,10 +74,10 @@ export default function PartnersSection() {
       {/* Call to Action or Additional Element for Professionalism */}
       <div className="relative mt-16 mx-auto max-w-4xl px-6 lg:px-8 text-center">
         <p className="text-sm text-gray-500 uppercase tracking-wide">
-          Join Our Network of Innovators
+        Rejoignez notre réseau d’innovateurs
         </p>
         <button className="mt-4 px-8 py-3 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-primary/90 transition-colors duration-300">
-          <a href="inscription">Become a Partner</a>
+          <a href="inscription">Devenez partenaire</a>
         </button>
       </div>
 

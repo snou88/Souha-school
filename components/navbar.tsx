@@ -6,13 +6,9 @@ import { usePathname } from "next/navigation"
 import { Menu, X, GraduationCap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import  logo  from "../public/image/image.png"
+import { sltNav, sltIdentity } from "@/lib/slt-content"
 
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/formations", label: "Programs" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-]
+const links = sltNav.links
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -39,7 +35,11 @@ export function Navbar() {
       )}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="SLT Home">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5"
+          aria-label={`Accueil — ${sltIdentity.officialName}`}
+        >
           <div className="w-50 h-10">
             <img src={logo.src} alt="SLT Logo" className="w-full h-full" />
           </div>
@@ -69,10 +69,10 @@ export function Navbar() {
 
         <div className="hidden md:block">
           <Link
-            href="/inscription"
+            href={sltNav.cta.href}
             className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98]"
           >
-            Enroll Now
+            {sltNav.cta.label}
           </Link>
         </div>
 
@@ -80,7 +80,7 @@ export function Navbar() {
         <button
           className="flex h-10 w-10 items-center justify-center rounded-lg text-foreground transition-colors hover:bg-secondary md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-label={mobileOpen ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={mobileOpen}
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -110,10 +110,10 @@ export function Navbar() {
             </Link>
           ))}
           <Link
-            href="/inscription"
+            href={sltNav.cta.href}
             className="mt-2 inline-flex items-center justify-center rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110"
           >
-            Enroll Now
+            {sltNav.cta.label}
           </Link>
         </div>
       </div>

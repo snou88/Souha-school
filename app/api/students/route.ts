@@ -45,7 +45,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data: formattedData })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     } = body
 
     if (!email) {
-      return NextResponse.json({ success: false, error: 'Email is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "L’email est requis." }, { status: 400 })
     }
 
     // Préparer les données selon le type
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -130,7 +130,7 @@ export async function PUT(request: Request) {
     const { id, ...updates } = body
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "L’identifiant est requis." }, { status: 400 })
     }
 
     updates.updated_at = new Date().toISOString()
@@ -150,7 +150,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: true, data })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -161,7 +161,7 @@ export async function DELETE(request: Request) {
     const { id } = body
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "L’identifiant est requis." }, { status: 400 })
     }
 
     // Vérifier s'il y a des inscriptions associées
@@ -200,6 +200,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }

@@ -4,9 +4,9 @@ import { Footer } from "@/components/footer"
 import { FormationsContent } from "@/components/formations/formations-content"
 
 export const metadata: Metadata = {
-  title: "Programs",
+  title: "Formations",
   description:
-    "Explore SLT Academy's professional training programs in web development, data science, design, marketing, and more.",
+    "Découvrez nos formations professionnelles: techniques, informatiques, transversales et programmes personnalisés.",
 }
 
 export default function FormationsPage() {

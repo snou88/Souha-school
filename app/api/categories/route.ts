@@ -17,7 +17,7 @@ export async function GET() {
     return NextResponse.json({ success: true, data })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const { name, slug, status } = body
 
     if (!name) {
-      return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "Le nom est requis." }, { status: 400 })
     }
 
     const finalSlug = slug || slugify(name)
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -58,7 +58,7 @@ export async function PUT(request: Request) {
     const { id, name, slug, status } = body
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "L’identifiant est requis." }, { status: 400 })
     }
 
     const updates: any = {}
@@ -82,7 +82,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: true, data })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -93,7 +93,7 @@ export async function DELETE(request: Request) {
     const { id } = body
 
     if (!id) {
-      return NextResponse.json({ success: false, error: 'ID is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "L’identifiant est requis." }, { status: 400 })
     }
 
     const { error } = await supabaseAdmin
@@ -109,7 +109,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 

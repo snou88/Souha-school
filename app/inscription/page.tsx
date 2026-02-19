@@ -4,9 +4,9 @@ import { Footer } from "@/components/footer"
 import { InscriptionForm } from "@/components/inscription/inscription-form"
 
 export const metadata: Metadata = {
-  title: "Enroll",
+  title: "Inscription",
   description:
-    "Apply to SLT Academy. Complete your enrollment in minutes and start your professional training journey.",
+    "Déposez une demande d’inscription et sélectionnez la formation souhaitée.",
 }
 
 export default function InscriptionPage() {

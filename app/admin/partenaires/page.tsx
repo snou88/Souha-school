@@ -83,7 +83,7 @@ export default function PartnersAdminPage() {
   // Create or Update partner
   async function handleSave() {
     const trimmedName = name.trim()
-    if (!trimmedName) return alert("Please enter the partner name.")
+    if (!trimmedName) return alert("Veuillez saisir le nom du partenaire.")
 
     let response
     if (editing) {
@@ -154,7 +154,7 @@ export default function PartnersAdminPage() {
   if (loading)
     return (
       <div className="flex items-center justify-center py-12">
-        Loading partners...
+        Chargement des partenaires…
       </div>
     )
 
@@ -165,7 +165,7 @@ export default function PartnersAdminPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Partenaires</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage partners, logos and links ({partners.length} total)
+            Gérer les partenaires, logos et liens ({partners.length} au total)
           </p>
         </div>
         <button
@@ -173,7 +173,7 @@ export default function PartnersAdminPage() {
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110"
         >
           <Plus className="h-4 w-4" />
-          New Partner
+          Nouveau partenaire
         </button>
       </div>
 
@@ -208,21 +208,21 @@ export default function PartnersAdminPage() {
                       {p.website.replace(/^https?:\/\//, "")}
                     </a>
                   ) : (
-                    <span className="text-[12px] text-muted-foreground mt-1">No website</span>
+                    <span className="text-[12px] text-muted-foreground mt-1">Aucun site</span>
                   )}
                 </div>
               </div>
               <Badge variant="secondary" className="text-[11px] font-semibold self-start">
-                Partner
+                Partenaire
               </Badge>
             </div>
 
             <div className="flex items-center justify-end gap-1 border-t border-border px-3 py-2.5">
               <button onClick={() => openEditPartner(p)} className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
-                <Pencil className="h-3.5 w-3.5" /> Edit
+                <Pencil className="h-3.5 w-3.5" /> Modifier
               </button>
               <button onClick={() => setDeleteTarget(p)} className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
-                <Trash2 className="h-3.5 w-3.5" /> Delete
+                <Trash2 className="h-3.5 w-3.5" /> Supprimer
               </button>
             </div>
           </div>
@@ -233,13 +233,15 @@ export default function PartnersAdminPage() {
       <Dialog open={dialogOpen} onOpenChange={(v) => { if (!v) setEditing(null); setDialogOpen(v) }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Partner" : "Add New Partner"}</DialogTitle>
-            <DialogDescription>{editing ? "Update partner details." : "Add a new partner with logo and website."}</DialogDescription>
+            <DialogTitle>{editing ? "Modifier le partenaire" : "Ajouter un partenaire"}</DialogTitle>
+            <DialogDescription>
+              {editing ? "Mettez à jour les informations du partenaire." : "Ajoutez un partenaire avec logo et site web (optionnel)."}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
             <div>
-              <label className="text-sm font-medium text-foreground">Company Name</label>
+              <label className="text-sm font-medium text-foreground">Nom</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -248,7 +250,7 @@ export default function PartnersAdminPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-foreground">Website (optional)</label>
+              <label className="text-sm font-medium text-foreground">Site web (optionnel)</label>
               <input
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
@@ -271,12 +273,12 @@ export default function PartnersAdminPage() {
                 <div className="flex flex-col gap-2">
                   <input ref={fileInputRef} onChange={handleFileChange} accept="image/*" type="file" className="hidden" id="logo-upload" />
                   <label htmlFor="logo-upload" className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary">
-                    Upload Logo
+                    Importer le logo
                   </label>
 
                   {logoPreview && (
                     <button onClick={handleRemoveLogoPreview} className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
-                      <X className="h-3.5 w-3.5" /> Remove
+                      <X className="h-3.5 w-3.5" /> Retirer
                     </button>
                   )}
                 </div>
@@ -285,10 +287,10 @@ export default function PartnersAdminPage() {
 
             <div className="flex gap-2 pt-1">
               <button onClick={handleSave} className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110">
-                {editing ? "Save Changes" : "Add Partner"}
+                {editing ? "Enregistrer" : "Ajouter"}
               </button>
               <button onClick={() => setDialogOpen(false)} className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary">
-                Cancel
+                Annuler
               </button>
             </div>
           </div>
@@ -299,17 +301,17 @@ export default function PartnersAdminPage() {
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Delete Partner</DialogTitle>
+            <DialogTitle>Supprimer le partenaire</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <span className="font-semibold text-foreground">{deleteTarget?.name}</span>? This action cannot be undone.
+              Confirmez-vous la suppression de <span className="font-semibold text-foreground">{deleteTarget?.name}</span> ? Cette action est irréversible.
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2 pt-2">
             <button onClick={() => setDeleteTarget(null)} className="flex-1 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary">
-              Cancel
+              Annuler
             </button>
             <button onClick={handleConfirmDelete} className="flex-1 rounded-lg bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground transition-all hover:brightness-110">
-              Delete
+              Supprimer
             </button>
           </div>
         </DialogContent>

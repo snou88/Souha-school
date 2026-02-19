@@ -26,7 +26,7 @@ export async function GET() {
     console.error('Unexpected error:', err)
     return NextResponse.json({ 
       success: false, 
-      error: 'Internal server error' 
+      error: "Erreur interne du serveur"
     }, { status: 500 })
   }
 }
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     if (!name || !email || !password) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Name, email and password are required' 
+        error: "Le nom, l’email et le mot de passe sont requis."
       }, { status: 400 })
     }
 
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     if (!emailRegex.test(email)) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Invalid email format' 
+        error: "Format d’email invalide."
       }, { status: 400 })
     }
 
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     if (password.length < 6) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Password must be at least 6 characters' 
+        error: "Le mot de passe doit contenir au moins 6 caractères."
       }, { status: 400 })
     }
 
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     if (existingAdmin) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Email already exists' 
+        error: "Cet email existe déjà."
       }, { status: 400 })
     }
 
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
     console.error('Unexpected error:', err)
     return NextResponse.json({ 
       success: false, 
-      error: 'Internal server error' 
+      error: "Erreur interne du serveur"
     }, { status: 500 })
   }
 }
@@ -125,7 +125,7 @@ export async function PUT(request: Request) {
     if (!id) {
       return NextResponse.json({ 
         success: false, 
-        error: 'ID is required' 
+        error: "L’identifiant est requis."
       }, { status: 400 })
     }
 
@@ -139,7 +139,7 @@ export async function PUT(request: Request) {
     if (!adminExists) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Admin not found' 
+        error: "Administrateur introuvable."
       }, { status: 404 })
     }
 
@@ -155,7 +155,7 @@ export async function PUT(request: Request) {
       if (existingAdmin) {
         return NextResponse.json({ 
           success: false, 
-          error: 'Email already used by another admin' 
+          error: "Cet email est déjà utilisé par un autre administrateur."
         }, { status: 400 })
       }
     }
@@ -188,7 +188,7 @@ export async function PUT(request: Request) {
     console.error('Unexpected error:', err)
     return NextResponse.json({ 
       success: false, 
-      error: 'Internal server error' 
+      error: "Erreur interne du serveur"
     }, { status: 500 })
   }
 }
@@ -202,7 +202,7 @@ export async function DELETE(request: Request) {
     if (!id) {
       return NextResponse.json({ 
         success: false, 
-        error: 'ID is required' 
+        error: "L’identifiant est requis."
       }, { status: 400 })
     }
 
@@ -214,7 +214,7 @@ export async function DELETE(request: Request) {
     if (count === 1) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Cannot delete the last admin' 
+        error: "Impossible de supprimer le dernier administrateur."
       }, { status: 400 })
     }
 
@@ -233,13 +233,13 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ 
       success: true,
-      message: 'Admin deleted successfully' 
+      message: "Administrateur supprimé avec succès."
     })
   } catch (err) {
     console.error('Unexpected error:', err)
     return NextResponse.json({ 
       success: false, 
-      error: 'Internal server error' 
+      error: "Erreur interne du serveur"
     }, { status: 500 })
   }
 }

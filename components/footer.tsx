@@ -8,22 +8,9 @@ import {
   FaInstagram,
   FaTiktok,
 } from "react-icons/fa";
+import { sltIdentity, sltNav } from "@/lib/slt-content";
 
-const quickLinks = [
-  { href: "/", label: "Home" },
-  { href: "/formations", label: "Programs" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-  { href: "/inscription", label: "Enroll Now" },
-];
-
-const programs = [
-  "Web Development",
-  "Data Science",
-  "Digital Marketing",
-  "UX/UI Design",
-  "Cybersecurity",
-];
+const quickLinks = [...sltNav.links, sltNav.cta];
 
 export function Footer() {
   return (
@@ -35,7 +22,7 @@ export function Footer() {
             <Link
               href="/"
               className="flex items-center gap-2.5"
-              aria-label="SLT Home"
+              aria-label="Accueil"
             >
               <div className="w-50 h-20">
                 <img src={logo.src} alt="SLT Logo" className="w-full h-full" />
@@ -43,17 +30,16 @@ export function Footer() {
               <span className="text-lg font-bold tracking-tight text-foreground"></span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-background/60 justify-center">
-              Empowering professionals with industry-leading training programs
-              since 2015. Your future starts here.
+              {sltIdentity.description}
             </p>
             {/* Réseaux sociaux avec icônes */}
-            <div className="flex items-center gap-4 mt-5 justify-center md:mr-8">
+            <div className="flex items-center gap-4 mt-5">
               <a
                 href="https://www.facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-600"
-                aria-label="Visit our Facebook page"
+                aria-label="Visiter notre page Facebook"
                 style={{ fontSize: "2rem" }}
               >
                 <FaFacebookF />
@@ -63,7 +49,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white text-lg transition-transform hover:scale-110 hover:text-pink-500"
-                aria-label="Visit our TikTok page"
+                aria-label="Visiter notre page TikTok"
                 style={{ fontSize: "2rem" }} 
               >
                 <FaTiktok />
@@ -73,7 +59,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white text-lg transition-transform hover:scale-110 hover:text-blue-700"
-                aria-label="Visit our LinkedIn page"
+                aria-label="Visiter notre page LinkedIn"
                 style={{ fontSize: "2rem" }}
               >
                 <FaLinkedinIn />
@@ -83,7 +69,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white text-lg transition-transform hover:scale-110 hover:text-pink-500"
-                aria-label="Visit our Instagram page"
+                aria-label="Visiter notre page Instagram"
                 style={{ fontSize: "2rem" }}
               >
                 <FaInstagram />
@@ -94,7 +80,7 @@ export function Footer() {
           {/* Quick Links */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-background/40">
-              Quick Links
+              Liens rapides
             </h3>
             <ul className="mt-4 flex flex-col gap-3">
               {quickLinks.map((link) => (
@@ -110,22 +96,14 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Programs */}
+          {/* Identité */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-background/40">
-              Programs
+              Établissement
             </h3>
-            <ul className="mt-4 flex flex-col gap-3">
-              {programs.map((p) => (
-                <li key={p}>
-                  <Link
-                    href="/formations"
-                    className="text-sm text-background/70 transition-colors hover:text-background"
-                  >
-                    {p}
-                  </Link>
-                </li>
-              ))}
+            <ul className="mt-4 flex flex-col gap-3 text-sm text-background/70">
+              <li className="font-medium text-background">{sltIdentity.officialName}</li>
+              <li>{sltIdentity.objective}</li>
             </ul>
           </div>
 
@@ -140,32 +118,32 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <FaMapMarkerAlt className="mt-1 text-lg text-white transition-transform hover:scale-110 hover:text-blue-500" />
                 <span className="text-sm text-background/70">
-                  STL Academy Headquarters
-                  <br />
-                  Algerie, Cheraga
+                  {sltIdentity.address}
                 </span>
               </li>
 
               {/* Téléphone */}
-              <li className="flex items-center gap-3">
-                <FaPhoneAlt className="text-lg text-white transition-transform hover:scale-110 hover:text-green-500" />
-                <a
-                  href="tel:+213540432265"
-                  className="text-sm text-background/70 transition-colors hover:text-background"
-                >
-                  +213 540 43 22 65
-                </a>
-              </li>
+              {sltIdentity.phones.map((p) => (
+                <li key={p} className="flex items-center gap-3">
+                  <FaPhoneAlt className="text-lg text-white transition-transform hover:scale-110 hover:text-green-500" />
+                  <a
+                    href={`tel:${p.replace(/[^\d+]/g, "")}`}
+                    className="text-sm text-background/70 transition-colors hover:text-background"
+                  >
+                    {p}
+                  </a>
+                </li>
+              ))}
 
               {/* Email */}
               <li className="flex items-center gap-3">
                 <FaEnvelope className="text-lg text-white transition-transform hover:scale-110 hover:text-red-500" />
-                <a
-                  href="mailto:info@stl-academy.com"
+                <Link
+                  href="/contact"
                   className="text-sm text-background/70 transition-colors hover:text-background"
                 >
-                  info@stl-academy.com
-                </a>
+                  Nous écrire via le formulaire de contact
+                </Link>
               </li>
             </ul>
           </div>
@@ -176,7 +154,7 @@ export function Footer() {
             <p className="text-xs text-background/40">
               {new Date().getFullYear()}{" "}
               <a href="https://snouportfolio.vercel.app/">
-                Created by Ahmed Senouci
+                Réalisé par Ahmed Senouci
               </a>
             </p>
           </div>

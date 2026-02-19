@@ -15,7 +15,7 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data })
   } catch {
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const { name, website, logo_url, description } = body
 
     if (!name) {
-      return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 })
+      return NextResponse.json({ success: false, error: "Le nom est requis." }, { status: 400 })
     }
 
     const { data, error } = await supabaseAdmin
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data })
   } catch {
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
 
@@ -62,6 +62,6 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch {
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }

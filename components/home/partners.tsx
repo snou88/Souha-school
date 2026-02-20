@@ -4,19 +4,21 @@ import Image from "next/image";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 const partners = [
-  require("@/public/partenaires/algerie.png"),
-  require("@/public/partenaires/dulcesol.png"),
-  require("@/public/partenaires/erenav.png"),
-  require("@/public/partenaires/Logo-bimo.png"),
-  require("@/public/partenaires/Logo-FONDAL.png"),
-  require("@/public/partenaires/SAFEX-logo.png"),
-  require("@/public/partenaires/snta.png"),
-  require("@/public/partenaires/sonlgaz.png"),
+  "/partenaires/1.png",
+  "/partenaires/3.png",
+  "/partenaires/4.png",
+  "/partenaires/5.png",
+  "/partenaires/6.png",
+  "/partenaires/7.png",
+  "/partenaires/8.png",
+  "/partenaires/9.png",
+  "/partenaires/10.png",
 ];
 
 export default function PartnersSection() {
   useScrollAnimation();
 
+  // Duplique le tableau plusieurs fois pour un effet seamless plus fluide
   const logosLoop = [...partners, ...partners, ...partners];
 
   return (
@@ -38,7 +40,7 @@ export default function PartnersSection() {
           {logosLoop.map((src, i) => (
             <div
               key={`r1-${i}`}
-              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
+              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl   transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
             >
               <Image
                 src={src}
@@ -56,7 +58,7 @@ export default function PartnersSection() {
           {logosLoop.map((src, i) => (
             <div
               key={`r2-${i}`}
-              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
+              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl   transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
             >
               <Image
                 src={src}
@@ -70,36 +72,50 @@ export default function PartnersSection() {
         </div>
       </div>
 
-      {/* Call to Action */}
+      {/* Call to Action or Additional Element for Professionalism */}
       <div className="relative mt-16 mx-auto max-w-4xl px-6 lg:px-8 text-center">
         <p className="text-sm text-gray-500 uppercase tracking-wide">
-          Rejoignez notre réseau d'innovateurs
+        Rejoignez notre réseau d’innovateurs
         </p>
         <button className="mt-4 px-8 py-3 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-primary/90 transition-colors duration-300">
           <a href="inscription">Devenez partenaire</a>
         </button>
       </div>
 
-      {/* Styles */}
+      {/* Custom CSS for Infinite Animation */}
       <style jsx>{`
         @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-100%); }
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
         }
+
         @keyframes marquee-reverse {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(0); }
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(0);
+          }
         }
+
         .animate-marquee {
           animation: marquee 30s linear infinite;
         }
+
         .animate-marquee-reverse {
           animation: marquee-reverse 30s linear infinite;
         }
+
+        /* ✅ Media query correcte */
         @media (max-width: 767px) {
           .animate-marquee {
             animation: marquee 5s linear infinite;
           }
+
           .animate-marquee-reverse {
             animation: marquee-reverse 5s linear infinite;
           }

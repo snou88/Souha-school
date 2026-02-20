@@ -63,3 +63,5 @@ tmp/
 
 # Supabase
 supabase/migrations/
+.vercel
+.env*.local

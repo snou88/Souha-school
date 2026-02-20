@@ -37,15 +37,16 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-2.5"
+          className="flex items-center gap-2.5 min-w-0 shrink-0"
           aria-label={`Accueil — ${sltIdentity.officialName}`}
         >
-          <div className="w-50 h-10">
-            <img src={logo.src} alt="SLT Logo" className="w-full h-full" />
+          <div className="relative h-8 w-auto min-w-[100px] sm:h-9 md:h-10 md:min-w-[120px] flex items-center">
+            <img
+              src={logo.src}
+              alt="SLT Logo"
+              className="h-full w-auto max-h-full object-contain object-left"
+            />
           </div>
-          <span className="text-lg font-bold tracking-tight text-foreground">
-            
-          </span>
         </Link>
 
         {/* Desktop links */}

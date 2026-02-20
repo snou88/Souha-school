@@ -3,7 +3,7 @@ export const sltIdentity = {
   phones: ["(+213) 0552 92 76 85", "(+213) 0540 73 29 28"],
   address: "42 Cooperative Djenane – Dely Ibrahim – Algérie",
   description:
-    "Souha School OF Languages and Training est un établissement privé agréé par le Ministère de la Formation et de l’Enseignement Professionnels, spécialisé dans la formation professionnelle de courte, moyenne et longue durée. L’école propose également des séminaires, des formations spécialisées, des activités de team building ainsi que des services de conseil et d’accompagnement des entreprises.",
+    "Souha School of Languages and Training est un établissement privé agréé, spécialisé dans la formation professionnelle (courte, moyenne et longue durée), ainsi que dans les séminaires, formations spécialisées, team building et services de conseil aux entreprises.",
   objective:
     "Assurer l’adéquation entre les compétences des collaborateurs et les exigences du marché du travail afin d’améliorer la performance et la compétitivité des organisations.",
 } as const

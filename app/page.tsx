@@ -5,9 +5,6 @@ import { WhyChooseUs } from "@/components/home/why-choose-us"
 import { CtaBanner } from "@/components/home/cta-banner"
 import PartnersSection from "@/components/home/partners"
 import FormationCard from '@/components/formation-card'
-import { ProblemsSolutions } from "@/components/home/problems-solutions"
-import { TrainingOverview } from "@/components/home/training-overview"
-import { SeminarsTeamBuilding } from "@/components/home/seminars-team-building"
 // import { getFormations } from '@/lib/formations'
 
 export default async function HomePage() {
@@ -48,9 +45,6 @@ export default async function HomePage() {
         </section>
 
         <WhyChooseUs />
-        <ProblemsSolutions />
-        <TrainingOverview />
-        <SeminarsTeamBuilding />
         <CtaBanner />
         <PartnersSection />
       </main>

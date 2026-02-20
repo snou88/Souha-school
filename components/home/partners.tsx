@@ -47,6 +47,7 @@ export default function PartnersSection() {
                 width={140}
                 height={40}
                 className="object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                unoptimized
               />
             </div>
           ))}
@@ -65,6 +66,7 @@ export default function PartnersSection() {
                 width={140}
                 height={40}
                 className="object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                unoptimized
               />
             </div>
           ))}

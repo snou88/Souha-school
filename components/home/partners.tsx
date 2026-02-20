@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+import { useEffect, useState } from "react";
 
 const partners = [
   "/partenaires/1.png",
@@ -17,107 +18,128 @@ const partners = [
 
 export default function PartnersSection() {
   useScrollAnimation();
+  const [animationSpeed, setAnimationSpeed] = useState(30);
 
-  // Duplique le tableau plusieurs fois pour un effet seamless plus fluide
-  const logosLoop = [...partners, ...partners, ...partners];
+  // Ajuster la vitesse d'animation selon la largeur d'écran
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setAnimationSpeed(20); // Plus rapide sur mobile
+      } else if (window.innerWidth < 1024) {
+        setAnimationSpeed(25);
+      } else {
+        setAnimationSpeed(30); // Plus lent sur desktop
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Duplique le tableau pour un effet seamless
+  const logosLoop = [...partners, ...partners, ...partners, ...partners];
 
   return (
-    <section className="relative py-24 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
-      {/* Title */}
+    <section className="relative py-16 md:py-24 overflow-hidden">
+      {/* Titre */}
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
-        <h2 className="text-balance text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+        <h2 className="text-balance text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900">
           Nos partenaires de confiance
         </h2>
-        <p className="mx-auto mt-6 max-w-3xl text-pretty text-lg leading-relaxed text-gray-600">
-          Nous collaborons avec des entreprises leaders dans leur secteur afin d’offrir à nos étudiants des opportunités concrètes et des parcours professionnels adaptés au monde réel. Nos partenariats favorisent l’innovation et l’excellence dans l’éducation.
+        <p className="mx-auto mt-6 max-w-3xl text-sm md:text-base lg:text-lg leading-relaxed text-gray-600 px-4">
+          Nous collaborons avec des entreprises leaders dans leur secteur afin d'offrir à nos étudiants des opportunités concrètes et des parcours professionnels adaptés au monde réel.
         </p>
       </div>
 
-      {/* Infinite Scrolling Logos */}
-      <div className="relative mt-16 w-full">
-        {/* Row 1: Left to Right */}
-        <div className="flex animate-marquee">
+      {/* Conteneur des logos avec dégradés */}
+      <div className="relative mt-12 md:mt-16 w-full before:absolute before:left-0 before:top-0 before:bottom-0 before:w-16 md:before:w-32 before:bg-gradient-to-r before:from-white before:to-transparent before:z-10 after:absolute after:right-0 after:top-0 after:bottom-0 after:w-16 md:after:w-32 after:bg-gradient-to-l after:from-white after:to-transparent after:z-10">
+        
+        {/* Ligne 1 : défilement gauche à droite */}
+        <div 
+          className="flex"
+          style={{
+            animation: `marquee ${animationSpeed}s linear infinite`,
+            width: 'fit-content'
+          }}
+        >
           {logosLoop.map((src, i) => (
             <div
-              key={`r1-${i}`}
-              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl   transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
+              key={`row1-${i}`}
+              className="flex items-center justify-center flex-shrink-0 w-28 sm:w-36 md:w-44 lg:w-48 h-16 sm:h-20 md:h-24 mx-4 sm:mx-6 md:mx-8 lg:mx-12 transition-transform duration-300 hover:scale-125"
             >
               <Image
                 src={src}
                 alt={`Partner ${i + 1}`}
-                width={140}
+                width={120}
                 height={40}
-                className="object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
+                className="object-contain w-20 sm:w-24 md:w-28 lg:w-32 max-h-12 md:max-h-16"
+                priority={i < 10}
               />
             </div>
           ))}
         </div>
 
-        {/* Row 2: Right to Left */}
-        <div className="flex animate-marquee-reverse mt-12">
-          {logosLoop.map((src, i) => (
-            <div
-              key={`r2-${i}`}
-              className="flex items-center justify-center flex-shrink-0 w-48 h-24 mx-12 bg-transparent rounded-xl   transition-all duration-500 ease-in-out transform hover:scale-110 hover:-translate-y-2"
-            >
-              <Image
-                src={src}
-                alt={`Partner ${i + 1}`}
-                width={140}
-                height={40}
-                className="object-contain filter grayscale hover:grayscale-0 transition-all duration-300"
-              />
-            </div>
-          ))}
+        {/* Ligne 2 : défilement droite à gauche */}
+        <div className="mt-4 sm:mt-6 md:mt-8 lg:mt-12">
+          <div 
+            className="flex"
+            style={{
+              animation: `marquee-reverse ${animationSpeed}s linear infinite`,
+              width: 'fit-content'
+            }}
+          >
+            {logosLoop.map((src, i) => (
+              <div
+                key={`row2-${i}`}
+                className="flex items-center justify-center flex-shrink-0 w-28 sm:w-36 md:w-44 lg:w-48 h-16 sm:h-20 md:h-24 mx-4 sm:mx-6 md:mx-8 lg:mx-12 transition-transform duration-300 hover:scale-125"
+              >
+                <Image
+                  src={src}
+                  alt={`Partner ${i + 1}`}
+                  width={120}
+                  height={40}
+                  className="object-contain w-20 sm:w-24 md:w-28 lg:w-32 max-h-12 md:max-h-16"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Call to Action or Additional Element for Professionalism */}
-      <div className="relative mt-16 mx-auto max-w-4xl px-6 lg:px-8 text-center">
-        <p className="text-sm text-gray-500 uppercase tracking-wide">
-        Rejoignez notre réseau d’innovateurs
+      {/* Call to Action */}
+      <div className="relative mt-12 md:mt-16 mx-auto max-w-4xl px-6 lg:px-8 text-center">
+        <p className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide font-medium">
+          Rejoignez notre réseau d'innovateurs
         </p>
-        <button className="mt-4 px-8 py-3 bg-primary text-white font-semibold rounded-full shadow-md hover:bg-primary/90 transition-colors duration-300">
-          <a href="inscription">Devenez partenaire</a>
-        </button>
+        <a 
+          href="/inscription" 
+          className="inline-block mt-4 px-6 sm:px-8 py-2.5 sm:py-3 bg-primary text-white text-sm sm:text-base font-semibold rounded-full shadow-md hover:bg-primary/90 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+        >
+          Devenez partenaire
+        </a>
       </div>
 
-      {/* Custom CSS for Infinite Animation */}
       <style jsx>{`
         @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
         }
 
         @keyframes marquee-reverse {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(0);
+          0% { transform: translateX(-33.333%); }
+          100% { transform: translateX(0); }
+        }
+
+        @media (max-width: 640px) {
+          div[style*="animation"] {
+            animation-duration: 20s !important;
           }
         }
 
-        .animate-marquee {
-          animation: marquee 30s linear infinite;
-        }
-
-        .animate-marquee-reverse {
-          animation: marquee-reverse 30s linear infinite;
-        }
-
-        /* ✅ Media query correcte */
-        @media (max-width: 767px) {
-          .animate-marquee {
-            animation: marquee 5s linear infinite;
-          }
-
-          .animate-marquee-reverse {
-            animation: marquee-reverse 5s linear infinite;
+        @media (min-width: 641px) and (max-width: 1024px) {
+          div[style*="animation"] {
+            animation-duration: 25s !important;
           }
         }
       `}</style>

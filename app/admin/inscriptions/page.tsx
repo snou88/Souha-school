@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
+import Link from "next/link"
 import {
   Search,
   Check,
@@ -22,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useToast } from "@/components/ui/use-toast"
 import { sltUiLabels } from "@/lib/slt-content"
 
 interface Inscription {
@@ -56,6 +58,7 @@ export default function InscriptionsAdminPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
   const [page, setPage] = useState(1)
+  const { toast } = useToast()
 
   // Charger les inscriptions
   useEffect(() => {
@@ -98,9 +101,32 @@ export default function InscriptionsAdminPage() {
         setInscriptions((prev) => 
           prev.map(i => i.id === id ? { ...i, status: "Approved" } : i)
         )
+        toast({
+          title: "Inscription approuvée",
+          description: "L'apprenant figure dans la liste des apprenants et est compté dans la formation.",
+          action: (
+            <Link
+              href="/admin/students"
+              className="inline-flex rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              Voir les apprenants
+            </Link>
+          ),
+        })
+      } else {
+        toast({
+          title: "Erreur",
+          description: result.error || "Impossible d'approuver l'inscription",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("❌ Erreur lors de l'approbation:", error)
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'approbation",
+        variant: "destructive",
+      })
     }
   }
 

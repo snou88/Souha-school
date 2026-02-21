@@ -20,8 +20,14 @@ export async function GET() {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
+    // N'exposer que les apprenants effectivement validés.
+    // Pending/Inactive (rejetés) restent hors de la liste apprenants et du comptage formations.
+    const visibleStudents = data.filter(
+      student => student.status === 'Active' || student.status === 'Graduated'
+    )
+
     // Transformer les données pour le frontend
-    const formattedData = data.map(student => ({
+    const formattedData = visibleStudents.map(student => ({
       id: student.id,
       type: student.type || 'Individual',
       firstName: student.firstName || '',
@@ -35,9 +41,12 @@ export async function GET() {
       companyContactName: student.companyContactName || '',
       companyContactEmail: student.companyContactEmail || '',
       formationId: student.formation_id,
+      formation_id: student.formation_id,
       formation: student.formations?.name || 'Unknown',
       status: student.status || 'Active',
       enrolled_date: student.enrolled_date || student.created_at,
+      enrolled: student.enrolled_date || student.created_at,
+      inscription_date: student.inscription_date || student.enrolled_date || student.created_at,
       created_at: student.created_at,
       number: student.number || 1
     }))

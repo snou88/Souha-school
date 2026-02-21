@@ -125,11 +125,12 @@ export default function FormationsAdminPage() {
         let formationsWithCount = formationsResult.data || []
         
         if (studentsResult.success) {
-          // Compter les étudiants par formation
+          // Compter les étudiants par formation (API renvoie formationId)
           const studentCounts: Record<string, number> = {}
           studentsResult.data.forEach((student: any) => {
-            if (student.formation_id) {
-              studentCounts[student.formation_id] = (studentCounts[student.formation_id] || 0) + 1
+            const fid = student.formationId ?? student.formation_id
+            if (fid) {
+              studentCounts[fid] = (studentCounts[fid] || 0) + 1
             }
           })
           

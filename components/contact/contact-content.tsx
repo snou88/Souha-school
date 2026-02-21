@@ -6,28 +6,43 @@ import { cn } from "@/lib/utils";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { sltIdentity } from "@/lib/slt-content";
 
+const contactEmail = "SOUHA.SCHOOL.LT@GMAIL.COM";
+
+const mapAddressHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(sltIdentity.address)}`;
+
+const normalizePhoneForTel = (phone: string) => phone.replace(/[^\d+]/g, "");
+
 const contactInfo = [
   {
     icon: MapPin,
     title: "Adresse",
-    lines: [sltIdentity.address],
+    subtitle: "Cliquez pour ouvrir l’itinéraire",
+    lines: [{ label: sltIdentity.address, href: mapAddressHref }],
   },
   {
     icon: Phone,
     title: "Téléphone",
-    lines: sltIdentity.phones,
+    subtitle: "Cliquez pour appeler",
+    lines: sltIdentity.phones.map((phone) => ({
+      label: phone,
+      href: `tel:${normalizePhoneForTel(phone)}`,
+    })),
   },
   {
     icon: Mail,
     title: "Email",
-    lines: ["Via le formulaire de contact"],
+    subtitle: "Réponse généralement sous 24h ouvrées",
+    lines: [{ label: contactEmail, href: `mailto:${contactEmail}` }],
   },
   {
     icon: Clock,
     title: "Horaires",
-    lines: ["Dimanche - Jeudi : 09:00 - 18:00", "Samedi : 10:00 - 14:00"],
+    lines: [
+      { label: "Dimanche - Jeudi : 09:00 - 18:00" },
+      { label: "Samedi : 10:00 - 14:00" },
+    ],
   },
-];
+] as const;
 
 interface FormErrors {
   name?: string;
@@ -79,10 +94,10 @@ export function ContactContent() {
             Contact
           </span>
           <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-            Échangeons sur votre besoin
+            Parlons de votre projet
           </h1>
           <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
-            Une question sur nos formations, séminaires ou accompagnements ? Notre équipe est à votre écoute.
+            Une question sur nos formations, séminaires ou accompagnements ? Notre équipe vous répond avec un accompagnement clair, rapide et personnalisé.
           </p>
         </div>
 
@@ -94,7 +109,7 @@ export function ContactContent() {
               {contactInfo.map((item) => (
                 <div
                   key={item.title}
-                  className="animate-on-scroll flex items-start gap-4 rounded-xl border border-border bg-card p-5 shadow-sm"
+                  className="animate-on-scroll flex items-start gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <item.icon className="h-5 w-5" />
@@ -103,18 +118,25 @@ export function ContactContent() {
                     <h3 className="text-sm font-semibold text-foreground">
                       {item.title}
                     </h3>
+                    {item.subtitle && (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {item.subtitle}
+                      </p>
+                    )}
                     {item.lines.map((line) =>
-                      item.href ? (
+                      line.href ? (
                         <a
-                          key={line}
-                          href={item.href}
-                          className="block text-sm text-muted-foreground transition-colors hover:text-primary"
+                          key={line.label}
+                          href={line.href}
+                          target={line.href.startsWith("http") ? "_blank" : undefined}
+                          rel={line.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                          className="mt-1 block text-sm text-muted-foreground transition-colors hover:text-primary"
                         >
-                          {line}
+                          {line.label}
                         </a>
                       ) : (
-                        <p key={line} className="text-sm text-muted-foreground">
-                          {line}
+                        <p key={line.label} className="mt-1 text-sm text-muted-foreground">
+                          {line.label}
                         </p>
                       ),
                     )}
@@ -157,6 +179,7 @@ export function ContactContent() {
                 <form
                   onSubmit={handleSubmit}
                   noValidate
+                  id="contact-form"
                   className="flex flex-col gap-6"
                 >
                   <div className="grid gap-6 sm:grid-cols-2">
@@ -178,7 +201,7 @@ export function ContactContent() {
                           "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
                           errors.name ? "border-destructive" : "border-border",
                         )}
-                        placeholder="Ex : Ahmed Benali"
+                        placeholder="Ex : Ahmed Senouci"
                       />
                       {errors.name && (
                         <p className="mt-1 text-xs text-destructive">

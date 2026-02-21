@@ -122,9 +122,6 @@ export function RecentInscriptions() {
                 >
                   <Eye className="h-4 w-4" />
                 </Link>
-                <button className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
-                  <MoreHorizontal className="h-4 w-4" />
-                </button>
               </div>
             </div>
           ))
@@ -181,9 +178,6 @@ export function RecentInscriptions() {
                       >
                         <Eye className="h-3.5 w-3.5" />
                       </Link>
-                      <button className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
-                        <MoreHorizontal className="h-3.5 w-3.5" />
-                      </button>
                     </div>
                   </td>
                 </tr>

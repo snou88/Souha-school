@@ -371,7 +371,7 @@ export function InscriptionForm() {
                               id="lastName"
                               type="text"
                               className={inputClasses("lastName")}
-                              placeholder="Ex : Benali"
+                              placeholder="Ex : Senouci"
                               value={formData.lastName}
                               onChange={(e) => update("lastName", e.target.value)}
                             />
@@ -403,7 +403,7 @@ export function InscriptionForm() {
                               id="phone"
                               type="tel"
                               className={inputClasses("phone")}
-                              placeholder="Ex : +213 5xx xx xx xx"
+                              placeholder="Ex : 05 XX XX XX XX"
                               value={formData.phone}
                               onChange={(e) => update("phone", e.target.value)}
                             />
@@ -455,7 +455,7 @@ export function InscriptionForm() {
                               id="companyPhone"
                               type="tel"
                               className={inputClasses("companyPhone")}
-                              placeholder="Ex : +213 2xx xx xx xx"
+                              placeholder="Ex : 05 XX XX XX XX"
                               value={formData.companyPhone}
                               onChange={(e) => update("companyPhone", e.target.value)}
                             />

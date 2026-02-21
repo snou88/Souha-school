@@ -50,7 +50,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 className="text-white text-lg transition-transform hover:scale-110 hover:text-pink-500"
                 aria-label="Visiter notre page TikTok"
-                style={{ fontSize: "2rem" }} 
+                style={{ fontSize: "2rem" }}
               >
                 <FaTiktok />
               </a>
@@ -153,7 +153,12 @@ export function Footer() {
           <div className="flex flex-col items-center justify-between gap-4  border-background/10  md:flex-row">
             <p className="text-xs text-background/40">
               {new Date().getFullYear()}{" "}
-              <a href="https://snouportfolio.vercel.app/">
+              <a
+                href="https://snouportfolio.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-background/70 transition-colors hover:text-background"
+              >
                 Réalisé par Ahmed Senouci
               </a>
             </p>

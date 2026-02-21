@@ -52,9 +52,19 @@ export function StatCards() {
 
         if (studentsData.success && inscriptionsData.success && formationsData.success) {
           // Compter les étudiants par type
-          const totalStudents = studentsData.data.length
+          const getParticipantCount = (student: any) =>
+            typeof student.number === "number" && Number.isFinite(student.number) && student.number > 0
+              ? student.number
+              : 1
+
+          const totalStudents = studentsData.data.reduce(
+            (sum: number, student: any) => sum + getParticipantCount(student),
+            0
+          )
           const totalCompanies = studentsData.data.filter((s: any) => s.type === 'Company').length
-          const activeStudents = studentsData.data.filter((s: any) => s.status === 'Active').length
+          const activeStudents = studentsData.data
+            .filter((s: any) => s.status === 'Active')
+            .reduce((sum: number, student: any) => sum + getParticipantCount(student), 0)
 
           // Compter les inscriptions par statut
           const totalInscriptions = inscriptionsData.data.length

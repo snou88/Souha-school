@@ -1,6 +1,43 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 
+const RETRY_DELAY_MS = 800
+const MAX_RETRIES = 2
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const isTransientFetchError = (error: any) => {
+  const msg = `${error?.message || ''} ${error?.details || ''}`.toLowerCase()
+  return (
+    msg.includes('fetch failed') ||
+    msg.includes('connect timeout') ||
+    msg.includes('und_err_connect_timeout')
+  )
+}
+
+async function withRetry<T>(
+  operation: () => Promise<{ data: T | null; error: any }>
+): Promise<{ data: T | null; error: any }> {
+  let lastResult: { data: T | null; error: any } = { data: null, error: null }
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    const result = await operation()
+    lastResult = result
+
+    if (!result.error) {
+      return result
+    }
+
+    if (!isTransientFetchError(result.error) || attempt === MAX_RETRIES) {
+      return result
+    }
+
+    await sleep(RETRY_DELAY_MS * (attempt + 1))
+  }
+
+  return lastResult
+}
+
 // GET /api/inscriptions - Récupère toutes les inscriptions
 export async function GET() {
   try {
@@ -66,13 +103,22 @@ export async function POST(request: Request) {
     }
 
     // 1. Trouver l'ID de la formation
-    const { data: formationData, error: formationError } = await supabaseAdmin
-      .from('formations')
-      .select('id')
-      .eq('name', formation)
-      .single()
+    const { data: formationData, error: formationError } = await withRetry(
+      () =>
+        supabaseAdmin
+          .from('formations')
+          .select('id')
+          .eq('name', formation)
+          .single()
+    )
 
     if (formationError || !formationData) {
+      if (formationError && isTransientFetchError(formationError)) {
+        return NextResponse.json({
+          success: false,
+          error: "Connexion temporairement indisponible. Veuillez réessayer dans quelques secondes."
+        }, { status: 503 })
+      }
       return NextResponse.json({ 
         success: false, 
         error: "Formation introuvable."
@@ -80,45 +126,55 @@ export async function POST(request: Request) {
     }
 
     // 2. Créer l'étudiant
-    const { data: studentData, error: studentError } = await supabaseAdmin
-      .from('students')
-      .insert([{
-        type,
-        name,
-        email,
-        phone: phone || null,
-        number: number || 1,
-        formation_id: formationData.id,
-        status: 'Pending' // Les étudiants commencent avec status Pending
-      }])
-      .select()
-      .single()
+    const { data: studentData, error: studentError } = await withRetry(
+      () =>
+        supabaseAdmin
+          .from('students')
+          .insert([{
+            type,
+            name,
+            email,
+            phone: phone || null,
+            number: number || 1,
+            formation_id: formationData.id,
+            status: 'Pending' // Les étudiants commencent avec status Pending
+          }])
+          .select()
+          .single()
+    )
 
     if (studentError) {
       console.error('Error creating student:', studentError)
-      return NextResponse.json({ 
-        success: false, 
-        error: studentError.message 
-      }, { status: 500 })
+      return NextResponse.json({
+        success: false,
+        error: isTransientFetchError(studentError)
+          ? "Connexion temporairement indisponible. Veuillez réessayer dans quelques secondes."
+          : studentError.message
+      }, { status: isTransientFetchError(studentError) ? 503 : 500 })
     }
 
     // 3. Créer l'inscription
-    const { data: inscriptionData, error: inscriptionError } = await supabaseAdmin
-      .from('inscriptions')
-      .insert([{
-        student_id: studentData.id,
-        formation_id: formationData.id,
-        status: status || 'Pending'
-      }])
-      .select()
-      .single()
+    const { data: inscriptionData, error: inscriptionError } = await withRetry(
+      () =>
+        supabaseAdmin
+          .from('inscriptions')
+          .insert([{
+            student_id: studentData.id,
+            formation_id: formationData.id,
+            status: status || 'Pending'
+          }])
+          .select()
+          .single()
+    )
 
     if (inscriptionError) {
       console.error('Error creating inscription:', inscriptionError)
-      return NextResponse.json({ 
-        success: false, 
-        error: inscriptionError.message 
-      }, { status: 500 })
+      return NextResponse.json({
+        success: false,
+        error: isTransientFetchError(inscriptionError)
+          ? "Connexion temporairement indisponible. Veuillez réessayer dans quelques secondes."
+          : inscriptionError.message
+      }, { status: isTransientFetchError(inscriptionError) ? 503 : 500 })
     }
 
     return NextResponse.json({ 
@@ -149,41 +205,63 @@ export async function PUT(request: Request) {
     }
 
     // Mettre à jour l'inscription
-    const { data: inscription, error: inscriptionError } = await supabaseAdmin
-      .from('inscriptions')
-      .update({ 
-        status,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select()
-      .single()
+    const { data: inscription, error: inscriptionError } = await withRetry(
+      () =>
+        supabaseAdmin
+          .from('inscriptions')
+          .update({
+            status,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id)
+          .select()
+          .single()
+    )
 
     if (inscriptionError) {
       console.error('Supabase error:', inscriptionError)
-      return NextResponse.json({ success: false, error: inscriptionError.message }, { status: 500 })
+      return NextResponse.json({
+        success: false,
+        error: isTransientFetchError(inscriptionError)
+          ? "Connexion temporairement indisponible. Veuillez réessayer dans quelques secondes."
+          : inscriptionError.message
+      }, { status: isTransientFetchError(inscriptionError) ? 503 : 500 })
     }
 
     // Si le statut est "Approved", mettre à jour l'étudiant en "Active"
     if (status === "Approved" && inscription?.student_id) {
-      await supabaseAdmin
-        .from('students')
-        .update({ 
-          status: 'Active',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', inscription.student_id)
+      const { error: studentUpdateError } = await withRetry(
+        () =>
+          supabaseAdmin
+            .from('students')
+            .update({
+              status: 'Active',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', inscription.student_id)
+      )
+
+      if (studentUpdateError) {
+        console.error('Error updating student status to Active:', studentUpdateError)
+      }
     }
 
     // Si le statut est "Rejected", mettre à jour l'étudiant en "Inactive"
     if (status === "Rejected" && inscription?.student_id) {
-      await supabaseAdmin
-        .from('students')
-        .update({ 
-          status: 'Inactive',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', inscription.student_id)
+      const { error: studentUpdateError } = await withRetry(
+        () =>
+          supabaseAdmin
+            .from('students')
+            .update({
+              status: 'Inactive',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', inscription.student_id)
+      )
+
+      if (studentUpdateError) {
+        console.error('Error updating student status to Inactive:', studentUpdateError)
+      }
     }
 
     return NextResponse.json({ success: true, data: inscription })

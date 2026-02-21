@@ -292,15 +292,15 @@ export function InscriptionForm() {
                 <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
                   Merci, {formData.accountType === "Individual" 
                     ? `${formData.firstName} ${formData.lastName}`.trim()
-                    : formData.companyName}!
+                    : formData.companyName} !
                   Votre demande pour <span className="font-semibold text-foreground">{formData.selectedProgram}</span>{" "}
-                  a bien été reçue. Un accusé de réception sera envoyé à{" "}
+                  a bien été enregistrée. Un accusé de réception a été envoyé à{" "}
                   <span className="font-semibold text-foreground">
                     {formData.accountType === "Individual" 
                       ? formData.email 
                       : formData.companyContactEmail}
                   </span>
-                  .
+                  . Nous vous contacterons très prochainement avec les informations complémentaires.
                 </p>
               </div>
             ) : (

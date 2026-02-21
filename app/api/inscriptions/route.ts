@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
+import { sendInscriptionConfirmation, sendAdmissionEmail, sendNewInscriptionNotificationToAdmin } from '@/lib/email'
 
 const RETRY_DELAY_MS = 800
 const MAX_RETRIES = 2
@@ -177,6 +178,27 @@ export async function POST(request: Request) {
       }, { status: isTransientFetchError(inscriptionError) ? 503 : 500 })
     }
 
+    // Envoi de l'email de confirmation (n'échoue pas la requête si l'email échoue)
+    const emailResult = await sendInscriptionConfirmation({
+      to: email,
+      recipientName: name,
+      formationName: formation,
+    })
+    if (!emailResult.ok) {
+      console.warn('[inscriptions] Email de confirmation non envoyé:', emailResult.error)
+    }
+
+    // Notification admin : nouvelle inscription
+    const notifResult = await sendNewInscriptionNotificationToAdmin({
+      candidateName: name,
+      candidateEmail: email,
+      formationName: formation,
+      type: type === 'Company' ? 'Company' : 'Individual',
+    })
+    if (!notifResult.ok) {
+      console.warn('[inscriptions] Notification admin non envoyée:', notifResult.error)
+    }
+
     return NextResponse.json({ 
       success: true, 
       data: {
@@ -228,7 +250,7 @@ export async function PUT(request: Request) {
       }, { status: isTransientFetchError(inscriptionError) ? 503 : 500 })
     }
 
-    // Si le statut est "Approved", mettre à jour l'étudiant en "Active"
+    // Si le statut est "Approved", mettre à jour l'étudiant en "Active" et envoyer l'email d'admission
     if (status === "Approved" && inscription?.student_id) {
       const { error: studentUpdateError } = await withRetry(
         () =>
@@ -243,6 +265,24 @@ export async function PUT(request: Request) {
 
       if (studentUpdateError) {
         console.error('Error updating student status to Active:', studentUpdateError)
+      } else {
+        // Récupérer nom, email de l'étudiant et nom de la formation pour l'email d'admission
+        const [studentRes, formationRes] = await Promise.all([
+          supabaseAdmin.from('students').select('name, email').eq('id', inscription.student_id).single(),
+          supabaseAdmin.from('formations').select('name').eq('id', inscription.formation_id).single(),
+        ])
+        const studentData = studentRes.data
+        const formationData = formationRes.data
+        if (studentData?.email && studentData?.name && formationData?.name) {
+          const admissionResult = await sendAdmissionEmail({
+            to: studentData.email,
+            recipientName: studentData.name,
+            formationName: formationData.name,
+          })
+          if (!admissionResult.ok) {
+            console.warn('[inscriptions] Email d\'admission non envoyé:', admissionResult.error)
+          }
+        }
       }
     }
 

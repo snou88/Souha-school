@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import {
-  Search,
   ChevronDown,
   User,
+  Bell,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -31,10 +31,10 @@ interface AdminData {
 }
 
 export function AdminTopbar({ collapsed, onMobileToggle }: AdminTopbarProps) {
-  const [searchFocused, setSearchFocused] = useState(false)
   const [admin, setAdmin] = useState<AdminData | null>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [pendingInscriptions, setPendingInscriptions] = useState(0)
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -51,6 +51,23 @@ export function AdminTopbar({ collapsed, onMobileToggle }: AdminTopbarProps) {
       }
     }
     fetchAdminData()
+  }, [])
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch("/api/admin/notifications")
+        const data = await res.json()
+        if (data.success && typeof data.pendingInscriptions === "number") {
+          setPendingInscriptions(data.pendingInscriptions)
+        }
+      } catch (error) {
+        console.error("Erreur notifications:", error)
+      }
+    }
+    fetchNotifications()
+    const interval = setInterval(fetchNotifications, 60_000)
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
@@ -106,8 +123,21 @@ export function AdminTopbar({ collapsed, onMobileToggle }: AdminTopbarProps) {
 
       </div>
 
-      {/* Right: Welcome message desktop + Profile */}
+      {/* Right: Notifications + Welcome message desktop + Profile */}
       <div className="flex items-center gap-4">
+        {/* Cloche notifications : inscriptions en attente */}
+        <Link
+          href="/admin/inscriptions?status=Pending"
+          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+          title={pendingInscriptions > 0 ? `${pendingInscriptions} demande(s) en attente` : "Inscriptions"}
+        >
+          <Bell className="h-6 w-6" />
+          {pendingInscriptions > 0 && (
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+              {pendingInscriptions > 99 ? "99+" : pendingInscriptions}
+            </span>
+          )}
+        </Link>
         {/* Message de bienvenue desktop (complet) */}
         {!loading && admin && (
           <div className="hidden md:block text-right">

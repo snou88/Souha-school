@@ -86,8 +86,13 @@ export function FormationsContent() {
         if (studentsData.success) {
           const studentCounts: Record<string, number> = {}
           studentsData.data.forEach((student: any) => {
-            if (student.formation_id) {
-              studentCounts[student.formation_id] = (studentCounts[student.formation_id] || 0) + 1
+            const fid = student.formationId ?? student.formation_id
+            if (fid) {
+              const participantCount =
+                typeof student.number === "number" && Number.isFinite(student.number) && student.number > 0
+                  ? student.number
+                  : 1
+              studentCounts[fid] = (studentCounts[fid] || 0) + participantCount
             }
           })
           
@@ -104,7 +109,8 @@ export function FormationsContent() {
         // Extraire les catégories
         const uniqueCategories = activeFormations
           .map((f: Formation) => f.categories?.name)
-          .filter((name, index, self) => name && self.indexOf(name) === index)
+          .filter((name: string | undefined): name is string => Boolean(name))
+          .filter((name: string, index: number, self: string[]) => self.indexOf(name) === index)
         
         setCategories(["Toutes", ...uniqueCategories])
       }

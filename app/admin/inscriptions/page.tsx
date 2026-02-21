@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   Search,
   Check,
@@ -52,13 +53,23 @@ const statusIcons: Record<string, any> = {
 const ITEMS_PER_PAGE = 8
 
 export default function InscriptionsAdminPage() {
+  const searchParams = useSearchParams()
+  const statusFromUrl = searchParams.get("status")
   const [inscriptions, setInscriptions] = useState<Inscription[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "Pending" | "Approved" | "Rejected">(
+    statusFromUrl === "Pending" || statusFromUrl === "Approved" || statusFromUrl === "Rejected" ? statusFromUrl : "all"
+  )
   const [typeFilter, setTypeFilter] = useState("all")
   const [page, setPage] = useState(1)
   const { toast } = useToast()
+
+  // Synchroniser le filtre avec l'URL quand elle change (ex: clic sur la cloche notifications)
+  useEffect(() => {
+    const s = searchParams.get("status")
+    if (s === "Pending" || s === "Approved" || s === "Rejected") setStatusFilter(s)
+  }, [searchParams])
 
   // Charger les inscriptions
   useEffect(() => {

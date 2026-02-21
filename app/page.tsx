@@ -68,8 +68,13 @@ async function getRecentFormations() {
     const studentCounts: Record<string, number> = {}
     if (studentsData.success) {
       studentsData.data.forEach((student: any) => {
-        if (student.formation_id) {
-          studentCounts[student.formation_id] = (studentCounts[student.formation_id] || 0) + 1
+        const fid = student.formationId ?? student.formation_id
+        if (fid) {
+          const participantCount =
+            typeof student.number === "number" && Number.isFinite(student.number) && student.number > 0
+              ? student.number
+              : 1
+          studentCounts[fid] = (studentCounts[fid] || 0) + participantCount
         }
       })
     }

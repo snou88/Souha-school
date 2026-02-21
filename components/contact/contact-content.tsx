@@ -49,11 +49,13 @@ interface FormErrors {
   email?: string;
   subject?: string;
   message?: string;
+  form?: string;
 }
 
 export function ContactContent() {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -76,12 +78,32 @@ export function ContactContent() {
     return e;
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
-    if (Object.keys(validationErrors).length === 0) {
-      setSubmitted(true);
+    if (Object.keys(validationErrors).length > 0) return;
+
+    setLoading(true);
+    setErrors({});
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setSubmitted(true);
+        setFormData({ name: "", email: "", subject: "", message: "" });
+      } else {
+        setErrors({ form: data.error ?? "Impossible d'envoyer le message. Réessayez plus tard." });
+      }
+    } catch {
+      setErrors({ form: "Erreur de connexion. Réessayez plus tard." });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -182,6 +204,11 @@ export function ContactContent() {
                   id="contact-form"
                   className="flex flex-col gap-6"
                 >
+                  {errors.form && (
+                    <p className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                      {errors.form}
+                    </p>
+                  )}
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div>
                       <label
@@ -293,10 +320,11 @@ export function ContactContent() {
 
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center gap-2 self-start rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98]"
+                    disabled={loading}
+                    className="inline-flex items-center justify-center gap-2 self-start rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <Send className="h-4 w-4" />
-                    Envoyer le message
+                    {loading ? "Envoi en cours…" : "Envoyer le message"}
                   </button>
                 </form>
               )}

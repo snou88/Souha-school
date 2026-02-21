@@ -308,3 +308,93 @@ Connectez-vous à l'espace admin pour traiter cette demande.
     return { ok: false, error: message }
   }
 }
+
+// --- Formulaire contact : envoi à l'admin (CONTACT_EMAIL) ---
+
+export interface ContactFormParams {
+  name: string
+  email: string
+  subject: string
+  message: string
+}
+
+/**
+ * Envoie le message du formulaire contact à l'admin (CONTACT_EMAIL).
+ */
+export async function sendContactFormToAdmin(
+  params: ContactFormParams
+): Promise<{ ok: boolean; error?: string }> {
+  const adminEmail = process.env.CONTACT_EMAIL
+  if (!adminEmail) {
+    console.warn("[email] CONTACT_EMAIL non défini. Message contact non envoyé.")
+    return { ok: false, error: "CONTACT_EMAIL non défini" }
+  }
+
+  const { name, email, subject, message } = params
+  const from = process.env.SMTP_USER || adminEmail
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message depuis le formulaire contact</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden;">
+          <tr>
+            <td style="padding: 40px 40px 32px 40px;">
+              <p style="margin: 0 0 24px 0; font-size: 14px; color: #64748b;">Souha School – Formulaire contact</p>
+              <h1 style="margin: 0 0 24px 0; font-size: 22px; font-weight: 700; color: #0f172a;">Nouveau message</h1>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%; margin-bottom: 24px; border-collapse: collapse;">
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;"><strong>Nom</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">${name}</td></tr>
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;"><strong>Email</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">${email}</td></tr>
+                <tr><td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;"><strong>Objet</strong></td><td style="padding: 8px 0; border-bottom: 1px solid #e2e8f0;">${subject}</td></tr>
+              </table>
+              <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #334155;">Message :</p>
+              <div style="font-size: 16px; line-height: 1.6; color: #334155; white-space: pre-wrap;">${message.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`.trim()
+
+  const text = `
+Souha School – Formulaire contact
+
+Nom: ${name}
+Email: ${email}
+Objet: ${subject}
+
+Message:
+${message}
+`.trim()
+
+  try {
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn("[email] SMTP non configuré. Message contact non envoyé.")
+      return { ok: false, error: "SMTP non configuré" }
+    }
+    await transporter.sendMail({
+      from: `"Souha School" <${from}>`,
+      to: adminEmail,
+      replyTo: email,
+      subject: `[Contact] ${subject}`,
+      text,
+      html,
+    })
+    return { ok: true }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erreur inconnue"
+    console.error("[email] Échec envoi formulaire contact:", message)
+    return { ok: false, error: message }
+  }
+}

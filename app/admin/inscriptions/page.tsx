@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
@@ -52,7 +52,7 @@ const statusIcons: Record<string, any> = {
 
 const ITEMS_PER_PAGE = 8
 
-export default function InscriptionsAdminPage() {
+function InscriptionsAdminContent() {
   const searchParams = useSearchParams()
   const statusFromUrl = searchParams.get("status")
   const [inscriptions, setInscriptions] = useState<Inscription[]>([])
@@ -410,5 +410,24 @@ export default function InscriptionsAdminPage() {
         )}
       </div>
     </div>
+  )
+}
+
+function InscriptionsAdminFallback() {
+  return (
+    <div className="flex h-96 items-center justify-center">
+      <div className="text-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+        <p className="mt-4 text-sm text-muted-foreground">Chargement des inscriptions…</p>
+      </div>
+    </div>
+  )
+}
+
+export default function InscriptionsAdminPage() {
+  return (
+    <Suspense fallback={<InscriptionsAdminFallback />}>
+      <InscriptionsAdminContent />
+    </Suspense>
   )
 }

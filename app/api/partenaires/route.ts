@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 
-// GET /api/partners
+// GET /api/partenaires
 export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
@@ -23,7 +23,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, website, logo_url, description } = body
+    const { name, website, logoBase64 } = body
 
     if (!name) {
       return NextResponse.json({ success: false, error: "Le nom est requis." }, { status: 400 })
@@ -31,7 +31,11 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabaseAdmin
       .from('partners')
-      .insert([{ name, website, logo_url, description }])
+      .insert([{ 
+        name, 
+        website: website || null, 
+        logo_url: logoBase64 || null 
+      }])
       .select()
       .single()
 
@@ -40,7 +44,48 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, data })
-  } catch {
+  } catch (error) {
+    console.error('POST error:', error)
+    return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
+  }
+}
+
+// PUT (UPDATE)
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json()
+    const { id, name, website, logoBase64, removeLogo } = body
+
+    if (!id || !name) {
+      return NextResponse.json({ success: false, error: "ID et nom sont requis." }, { status: 400 })
+    }
+
+    let updateData: any = { 
+      name, 
+      website: website || null 
+    }
+
+    // Gérer le logo
+    if (removeLogo) {
+      updateData.logo_url = null
+    } else if (logoBase64) {
+      updateData.logo_url = logoBase64
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('partners')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, data })
+  } catch (error) {
+    console.error('PUT error:', error)
     return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }
@@ -48,8 +93,7 @@ export async function POST(request: Request) {
 // DELETE
 export async function DELETE(request: Request) {
   try {
-    const body = await request.json()
-    const { id } = body
+    const { id } = await request.json()
 
     const { error } = await supabaseAdmin
       .from('partners')
@@ -61,7 +105,8 @@ export async function DELETE(request: Request) {
     }
 
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (error) {
+    console.error('DELETE error:', error)
     return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })
   }
 }

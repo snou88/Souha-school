@@ -21,7 +21,7 @@ import {
 interface Partner {
   id: string
   name: string
-  logoUrl?: string | null
+  logo_url?: string | null
   website?: string | null
   featured?: boolean
 }
@@ -35,8 +35,9 @@ export default function PartnersAdminPage() {
 
   const [name, setName] = useState("")
   const [website, setWebsite] = useState("")
-  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoBase64, setLogoBase64] = useState<string | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | undefined>(undefined)
+  const [removeLogo, setRemoveLogo] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   // Fetch partners from API
@@ -53,8 +54,9 @@ export default function PartnersAdminPage() {
     setEditing(null)
     setName("")
     setWebsite("")
-    setLogoFile(null)
+    setLogoBase64(null)
     setLogoPreview(undefined)
+    setRemoveLogo(false)
     setDialogOpen(true)
   }
 
@@ -62,21 +64,32 @@ export default function PartnersAdminPage() {
     setEditing(p)
     setName(p.name)
     setWebsite(p.website || "")
-    setLogoPreview(p.logoUrl || undefined)
-    setLogoFile(null)
+    setLogoPreview(p.logo_url || undefined)
+    setLogoBase64(null)
+    setRemoveLogo(false)
     setDialogOpen(true)
   }
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null
-    setLogoFile(f)
-    if (f) setLogoPreview(URL.createObjectURL(f))
-    else setLogoPreview(undefined)
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64String = reader.result as string
+      setLogoBase64(base64String)
+      setLogoPreview(base64String)
+      setRemoveLogo(false)
+    }
+    reader.readAsDataURL(file)
+    
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   function handleRemoveLogoPreview() {
-    setLogoFile(null)
+    setLogoBase64(null)
     setLogoPreview(undefined)
+    setRemoveLogo(true)
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
@@ -95,7 +108,8 @@ export default function PartnersAdminPage() {
           id: editing.id,
           name: trimmedName,
           website: website.trim() || null,
-          logoUrl: logoPreview || null,
+          logoBase64: logoBase64,
+          removeLogo: removeLogo,
         }),
       })
     } else {
@@ -106,7 +120,7 @@ export default function PartnersAdminPage() {
         body: JSON.stringify({
           name: trimmedName,
           website: website.trim() || null,
-          logoUrl: logoPreview || null,
+          logoBase64: logoBase64,
         }),
       })
     }
@@ -187,8 +201,15 @@ export default function PartnersAdminPage() {
             <div className="flex items-start justify-between p-4 pb-2">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-muted">
-                  {p.logoUrl ? (
-                    <img src={p.logoUrl} alt={`${p.name} logo`} className="h-full w-full object-contain" />
+                  {p.logo_url ? (
+                    <img 
+                      src={p.logo_url} 
+                      alt={`${p.name} logo`} 
+                      className="h-full w-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder-logo.png'
+                      }}
+                    />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                       <ImageIcon className="h-6 w-6" />
@@ -246,6 +267,7 @@ export default function PartnersAdminPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="mt-1.5 h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="Nom du partenaire"
               />
             </div>
 
@@ -255,6 +277,7 @@ export default function PartnersAdminPage() {
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 className="mt-1.5 h-9 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                placeholder="https://example.com"
               />
             </div>
 
@@ -271,18 +294,28 @@ export default function PartnersAdminPage() {
                   )}
                 </div>
                 <div className="flex flex-col gap-2">
-                  <input ref={fileInputRef} onChange={handleFileChange} accept="image/*" type="file" className="hidden" id="logo-upload" />
+                  <input 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    accept="image/*" 
+                    type="file" 
+                    className="hidden" 
+                    id="logo-upload" 
+                  />
                   <label htmlFor="logo-upload" className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary">
                     Importer le logo
                   </label>
 
-                  {logoPreview && (
+                  {(logoPreview || (editing && editing.logo_url)) && (
                     <button onClick={handleRemoveLogoPreview} className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground">
                       <X className="h-3.5 w-3.5" /> Retirer
                     </button>
                   )}
                 </div>
               </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Le logo sera stocké directement dans la base de données (format Base64)
+              </p>
             </div>
 
             <div className="flex gap-2 pt-1">

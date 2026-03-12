@@ -9,9 +9,20 @@ import {
   CheckCircle2,
   ArrowLeft,
   ArrowRight,
+  Clock,
+  Users,
 } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 import { sltUiLabels } from "@/lib/slt-content"
+import { Badge } from "@/components/ui/badge"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 const steps = [
   { id: 1, title: "Type de demande", icon: GraduationCap },
@@ -21,6 +32,13 @@ const steps = [
 
 const accountTypes = ["Individual", "Company"] as const
 type AccountType = (typeof accountTypes)[number]
+
+interface Formation {
+  id: string
+  name: string
+  description: string | null
+  duration: string
+}
 
 interface FormData {
   accountType: AccountType | ""
@@ -40,7 +58,6 @@ interface FormData {
 
   // Program
   selectedProgram: string
-  startDate: string
   agreeTerms: boolean
 }
 
@@ -69,7 +86,7 @@ function validateStep(step: number, data: FormData): FormErrors {
       if (!data.companyStudentCount.trim() || isNaN(Number(data.companyStudentCount)))
         errors.companyStudentCount = "Veuillez saisir un nombre valide de participants."
       if (!data.companyContactName.trim()) errors.companyContactName = "Le nom du contact est requis."
-      if (!data.companyContactEmail.trim()) errors.companyContactEmail = "L’email du contact est requis."
+      if (!data.companyContactEmail.trim()) errors.companyContactEmail = "L'email du contact est requis."
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.companyContactEmail))
         errors.companyContactEmail = "Adresse email du contact invalide."
     }
@@ -77,7 +94,6 @@ function validateStep(step: number, data: FormData): FormErrors {
 
   if (step === 3) {
     if (!data.selectedProgram) errors.selectedProgram = "Veuillez sélectionner une formation."
-    if (!data.startDate) errors.startDate = "Veuillez sélectionner une période souhaitée."
   }
 
   return errors
@@ -88,6 +104,9 @@ export function InscriptionForm() {
   const [completed, setCompleted] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [loading, setLoading] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [selectedFormationDetails, setSelectedFormationDetails] = useState<Formation | null>(null)
+  const [temporarySelection, setTemporarySelection] = useState<string>("")
 
   const [formData, setFormData] = useState<FormData>({
     accountType: "",
@@ -104,12 +123,11 @@ export function InscriptionForm() {
     companyContactEmail: "",
 
     selectedProgram: "",
-    startDate: "",
     agreeTerms: false,
   })
 
   // State pour les programmes
-  const [programs, setPrograms] = useState<Array<{ id: string; name: string }>>([])
+  const [programs, setPrograms] = useState<Formation[]>([])
   const [programsLoading, setProgramsLoading] = useState(true)
   const [programsError, setProgramsError] = useState<string | null>(null)
 
@@ -121,7 +139,34 @@ export function InscriptionForm() {
         const res = await fetch("/api/formations")
         const json = await res.json()
         if (!json.success) throw new Error(json.error || "Impossible de charger les formations")
-        setPrograms(Array.isArray(json.data) ? json.data.map((f: any) => ({ id: f.id, name: f.name })) : [])
+        
+        const formationsData = Array.isArray(json.data) ? json.data.map((f: any) => ({ 
+          id: f.id, 
+          name: f.name,
+          description: f.description,
+          duration: f.duration 
+        })) : []
+        
+        setPrograms(formationsData)
+        
+        // Vérifier s'il y a une formation pré-sélectionnée dans l'URL
+        const params = new URLSearchParams(window.location.search)
+        const formationId = params.get('formation')
+        const formationName = params.get('name')
+        
+        if (formationId) {
+          // Chercher par ID
+          const found = formationsData.find((f: Formation) => f.id === formationId)
+          if (found) {
+            setFormData(prev => ({ ...prev, selectedProgram: found.id }))
+          }
+        } else if (formationName) {
+          // Chercher par nom (pour la compatibilité)
+          const found = formationsData.find((f: Formation) => f.name === decodeURIComponent(formationName))
+          if (found) {
+            setFormData(prev => ({ ...prev, selectedProgram: found.id }))
+          }
+        }
       } catch (e: any) {
         setProgramsError(e.message || "Erreur lors du chargement des programmes")
       } finally {
@@ -146,10 +191,13 @@ export function InscriptionForm() {
     try {
       setLoading(true)
       
+      // Récupérer le nom de la formation sélectionnée
+      const selectedFormation = programs.find(p => p.id === payload.selectedProgram)
+      
       // Construction du payload
       let apiPayload: any = {
         type: payload.accountType,
-        formation: payload.selectedProgram,
+        formation: selectedFormation?.name || payload.selectedProgram,
         status: "Pending"
       }
 
@@ -197,6 +245,25 @@ export function InscriptionForm() {
     }
   }
 
+  function handleFormationSelect(formationId: string) {
+    const formation = programs.find(f => f.id === formationId)
+    if (formation) {
+      setSelectedFormationDetails(formation)
+      setShowConfirmDialog(true)
+      setTemporarySelection(formationId)
+    }
+  }
+
+  function confirmFormation() {
+    update("selectedProgram", temporarySelection)
+    setShowConfirmDialog(false)
+  }
+
+  function cancelFormation() {
+    setShowConfirmDialog(false)
+    setTemporarySelection("")
+  }
+
   function handleNext() {
     const stepErrors = validateStep(currentStep, formData)
     setErrors(stepErrors)
@@ -221,6 +288,8 @@ export function InscriptionForm() {
       "w-full rounded-lg border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary",
       errors[field] ? "border-destructive" : "border-border"
     )
+
+  const selectedFormation = programs.find(f => f.id === formData.selectedProgram)
 
   return (
     <div className="bg-secondary pb-24 pt-32">
@@ -293,7 +362,7 @@ export function InscriptionForm() {
                   Merci, {formData.accountType === "Individual" 
                     ? `${formData.firstName} ${formData.lastName}`.trim()
                     : formData.companyName} !
-                  Votre demande pour <span className="font-semibold text-foreground">{formData.selectedProgram}</span>{" "}
+                  Votre demande pour <span className="font-semibold text-foreground">{selectedFormation?.name || formData.selectedProgram}</span>{" "}
                   a bien été enregistrée. Un accusé de réception a été envoyé à{" "}
                   <span className="font-semibold text-foreground">
                     {formData.accountType === "Individual" 
@@ -527,49 +596,104 @@ export function InscriptionForm() {
                 {currentStep === 3 && (
                   <div className="flex flex-col gap-6">
                     <h2 className="text-xl font-bold text-foreground">Choisir une formation</h2>
-                    <div>
-                      <label htmlFor="selectedProgram" className="mb-1.5 block text-sm font-medium text-foreground">
-                        Formation
-                      </label>
-                      <select
-                        id="selectedProgram"
-                        className={inputClasses("selectedProgram")}
-                        value={formData.selectedProgram}
-                        onChange={(e) => update("selectedProgram", e.target.value)}
-                      >
-                        <option value="">Sélectionner une formation</option>
-                        {programsLoading && <option disabled>Chargement…</option>}
-                        {programsError && <option disabled>Erreur de chargement</option>}
-                        {!programsLoading && !programsError && programs.length === 0 && (
-                          <option disabled>Aucune formation disponible</option>
+                    
+                    {selectedFormation ? (
+                      // Formation déjà sélectionnée - Affichage carte
+                      <div className="relative rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
+                        <div className="absolute -top-2 -right-2">
+                          <Badge className="bg-primary text-white border-0">
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Sélectionnée
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                            <BookOpen className="h-6 w-6 text-primary" />
+                          </div>
+                          
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-foreground">{selectedFormation.name}</h3>
+                            {selectedFormation.description && (
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                {selectedFormation.description}
+                              </p>
+                            )}
+                            
+                            <div className="flex flex-wrap gap-3 mt-3">
+                              <Badge variant="outline" className="bg-background">
+                                <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                                {selectedFormation.duration}
+                              </Badge>
+                            </div>
+                            
+                            {/* Message indiquant que la formation vient de la page précédente */}
+                            <p className="text-xs text-primary mt-2">
+                              ✓ Formation sélectionnée depuis la page des formations
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => update("selectedProgram", "")}
+                            className="text-sm text-primary hover:underline"
+                          >
+                            Changer
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      // Liste des formations à sélectionner
+                      <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
+                        {programsLoading ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          </div>
+                        ) : programsError ? (
+                          <p className="text-sm text-destructive text-center py-4">{programsError}</p>
+                        ) : programs.length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-4">Aucune formation disponible</p>
+                        ) : (
+                          programs.map((program) => (
+                            <button
+                              key={program.id}
+                              type="button"
+                              onClick={() => handleFormationSelect(program.id)}
+                              className="w-full text-left rounded-lg border border-border bg-background p-4 hover:border-primary/50 hover:shadow-sm transition-all group"
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-secondary/50 group-hover:bg-primary/10 transition-colors">
+                                  <BookOpen className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                </div>
+                                
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
+                                      {program.name}
+                                    </h4>
+                                    <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {program.duration}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          ))
                         )}
-                        {!programsLoading && !programsError &&
-                          programs.map((p) => (
-                            <option key={p.id} value={p.name}>
-                              {p.name}
-                            </option>
-                          ))}
-                      </select>
-                      {errors.selectedProgram && <p className="mt-1 text-xs text-destructive">{errors.selectedProgram}</p>}
-                    </div>
-                    <div>
-                      <label htmlFor="startDate" className="mb-1.5 block text-sm font-medium text-foreground">
-                        Période souhaitée
-                      </label>
-                      <select
-                        id="startDate"
-                        className={inputClasses("startDate")}
-                        value={formData.startDate}
-                        onChange={(e) => update("startDate", e.target.value)}
-                      >
-                        <option value="">Sélectionner une période</option>
-                        <option value="Mars 2026">Mars 2026</option>
-                        <option value="Juin 2026">Juin 2026</option>
-                        <option value="Septembre 2026">Septembre 2026</option>
-                        <option value="Janvier 2027">Janvier 2027</option>
-                      </select>
-                      {errors.startDate && <p className="mt-1 text-xs text-destructive">{errors.startDate}</p>}
-                    </div>
+                      </div>
+                    )}
+                    
+                    {errors.selectedProgram && (
+                      <p className="mt-1 text-xs text-destructive flex items-center gap-1">
+                        <span className="h-1 w-1 rounded-full bg-destructive" />
+                        {errors.selectedProgram}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -591,7 +715,7 @@ export function InscriptionForm() {
 
                   <button
                     onClick={handleNext}
-                    disabled={loading}
+                    disabled={loading || (currentStep === 3 && !formData.selectedProgram)}
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {currentStep === steps.length
@@ -607,6 +731,46 @@ export function InscriptionForm() {
           </div>
         </div>
       </div>
+
+      {/* Dialog de confirmation */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmer la formation</DialogTitle>
+            <DialogDescription>
+              Vous avez sélectionné la formation suivante :
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedFormationDetails && (
+            <div className="space-y-4 py-4">
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <h3 className="font-semibold text-foreground mb-2">{selectedFormationDetails.name}</h3>
+                {selectedFormationDetails.description && (
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {selectedFormationDetails.description}
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="bg-background">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {selectedFormationDetails.duration}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={cancelFormation}>
+                  Retour
+                </Button>
+                <Button onClick={confirmFormation} className="bg-primary text-white">
+                  Confirmer
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

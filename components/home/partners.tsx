@@ -4,21 +4,40 @@ import Image from "next/image";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { useEffect, useState } from "react";
 
-const partners = [
-  "/partenaires/1.png",
-  "/partenaires/3.png",
-  "/partenaires/4.png",
-  "/partenaires/5.png",
-  "/partenaires/6.png",
-  "/partenaires/7.png",
-  "/partenaires/8.png",
-  "/partenaires/9.png",
-  "/partenaires/10.png",
-];
+interface Partner {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  website?: string | null;
+}
 
 export default function PartnersSection() {
   useScrollAnimation();
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(true);
   const [animationSpeed, setAnimationSpeed] = useState(30);
+
+  // Charger les partenaires depuis l'API
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const res = await fetch('/api/partenaires');
+        const data = await res.json();
+        
+        if (data.success && Array.isArray(data.data)) {
+          // Filtrer les partenaires qui ont un logo
+          const partnersWithLogo = data.data.filter((p: Partner) => p.logo_url);
+          setPartners(partnersWithLogo);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des partenaires:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartners();
+  }, []);
 
   // Ajuster la vitesse d'animation selon la largeur d'écran
   useEffect(() => {
@@ -37,7 +56,39 @@ export default function PartnersSection() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Duplique le tableau pour un effet seamless
+  // Si pas de partenaires ou en chargement
+  if (loading) {
+    return (
+      <section className="relative py-16 md:py-24 overflow-hidden">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
+          <h2 className="text-balance text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900">
+            Nos partenaires de confiance
+          </h2>
+          <div className="flex justify-center mt-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (partners.length === 0) {
+    return (
+      <section className="relative py-16 md:py-24 overflow-hidden">
+        <div className="relative mx-auto max-w-7xl px-6 lg:px-8 text-center">
+          <h2 className="text-balance text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900">
+            Nos partenaires de confiance
+          </h2>
+          <p className="mx-auto mt-6 max-w-3xl text-sm md:text-base lg:text-lg leading-relaxed text-gray-600 px-4">
+            Nous collaborons avec des entreprises leaders dans leur secteur afin d'offrir à nos étudiants des opportunités concrètes et des parcours professionnels adaptés au monde réel.
+          </p>
+          <p className="mt-8 text-gray-500">Aucun partenaire pour le moment.</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Duplique le tableau pour un effet seamless (au moins 3 fois pour éviter les trous)
   const logosLoop = [...partners, ...partners, ...partners, ...partners];
 
   return (
@@ -63,19 +114,29 @@ export default function PartnersSection() {
             width: 'fit-content'
           }}
         >
-          {logosLoop.map((src, i) => (
+          {logosLoop.map((partner, i) => (
             <div
-              key={`row1-${i}`}
+              key={`row1-${partner.id}-${i}`}
               className="flex items-center justify-center flex-shrink-0 w-28 sm:w-36 md:w-44 lg:w-48 h-16 sm:h-20 md:h-24 mx-4 sm:mx-6 md:mx-8 lg:mx-12 transition-transform duration-300 hover:scale-125"
             >
-              <Image
-                src={src}
-                alt={`Partner ${i + 1}`}
-                width={120}
-                height={40}
-                className="object-contain w-20 sm:w-24 md:w-28 lg:w-32 max-h-12 md:max-h-16"
-                priority={i < 10}
-              />
+              {partner.logo_url ? (
+                <a 
+                  href={partner.website || '#'} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block w-full h-full flex items-center justify-center"
+                  title={partner.name}
+                >
+                  <Image
+                    src={partner.logo_url}
+                    alt={partner.name}
+                    width={120}
+                    height={40}
+                    className="object-contain w-20 sm:w-24 md:w-28 lg:w-32 max-h-12 md:max-h-16"
+                    priority={i < 10}
+                  />
+                </a>
+              ) : null}
             </div>
           ))}
         </div>
@@ -89,18 +150,28 @@ export default function PartnersSection() {
               width: 'fit-content'
             }}
           >
-            {logosLoop.map((src, i) => (
+            {logosLoop.map((partner, i) => (
               <div
-                key={`row2-${i}`}
+                key={`row2-${partner.id}-${i}`}
                 className="flex items-center justify-center flex-shrink-0 w-28 sm:w-36 md:w-44 lg:w-48 h-16 sm:h-20 md:h-24 mx-4 sm:mx-6 md:mx-8 lg:mx-12 transition-transform duration-300 hover:scale-125"
               >
-                <Image
-                  src={src}
-                  alt={`Partner ${i + 1}`}
-                  width={120}
-                  height={40}
-                  className="object-contain w-20 sm:w-24 md:w-28 lg:w-32 max-h-12 md:max-h-16"
-                />
+                {partner.logo_url ? (
+                  <a 
+                    href={partner.website || '#'} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block w-full h-full flex items-center justify-center"
+                    title={partner.name}
+                  >
+                    <Image
+                      src={partner.logo_url}
+                      alt={partner.name}
+                      width={120}
+                      height={40}
+                      className="object-contain w-20 sm:w-24 md:w-28 lg:w-32 max-h-12 md:max-h-16"
+                    />
+                  </a>
+                ) : null}
               </div>
             ))}
           </div>

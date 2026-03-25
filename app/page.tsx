@@ -8,6 +8,7 @@ import { HeroSection } from "@/components/home/hero-section"
 import { WhyChooseUs } from "@/components/home/why-choose-us"
 import { CtaBanner } from "@/components/home/cta-banner"
 import PartnersSection from "@/components/home/partners"
+import { LiquidCursorBlob } from "@/components/home/liquid-cursor-blob"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
@@ -339,7 +340,8 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
-      <main>
+      <main className="relative z-[2]">
+        <LiquidCursorBlob />
         <HeroSection />
 
         <section
@@ -572,7 +574,9 @@ export default function HomePage() {
         </DialogContent>
       </Dialog>
 
-      <Footer />
+      <div className="relative z-[2]">
+        <Footer />
+      </div>
 
       <style jsx>{`
         @keyframes float {

@@ -45,9 +45,9 @@ const values = [
 ]
 
 const stats = [
-  { label: "Formations disponibles", value: "25+", icon: Award },
-  { label: "Apprenants formés", value: "500+", icon: Users },
-  { label: "Taux de satisfaction", value: "96%", icon: CheckCircle },
+  { label: "Formations disponibles", target: 25, suffix: "+", icon: Award },
+  { label: "Apprenants formés", target: 500, suffix: "+", icon: Users },
+  { label: "Taux de satisfaction", target: 96, suffix: "%", icon: CheckCircle },
 ]
 
 // Couleurs pour les cartes
@@ -117,6 +117,7 @@ const staticCircles = [
 export function AboutContent() {
   useScrollAnimation()
   const [mounted, setMounted] = useState(false)
+  const [animatedStats, setAnimatedStats] = useState<number[]>(stats.map(() => 0))
   const parallaxRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -142,6 +143,28 @@ export function AboutContent() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [mounted])
+
+  useEffect(() => {
+    if (!mounted) return
+
+    const duration = 1300
+    const start = performance.now()
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1)
+      // Ease-out pour une fin plus douce.
+      const eased = 1 - Math.pow(1 - progress, 3)
+
+      setAnimatedStats(stats.map((stat) => Math.round(stat.target * eased)))
+
+      if (progress < 1) {
+        requestAnimationFrame(tick)
+      }
+    }
+
+    const frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
   }, [mounted])
 
   return (
@@ -210,16 +233,21 @@ export function AboutContent() {
             return (
               <div
                 key={stat.label}
-                className="animate-on-scroll group relative rounded-xl border border-border/50 bg-white/70 backdrop-blur-sm p-6 text-center shadow-lg transition-all duration-500 hover:shadow-xl hover:-translate-y-1"
+                className="animate-on-scroll group relative overflow-hidden rounded-2xl border border-border/50 bg-white/80 backdrop-blur-sm p-6 text-center shadow-lg transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary/10 to-primary/20 text-primary mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Icon className="h-6 w-6" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-primary/[0.03] opacity-70 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/10 blur-2xl transition-transform duration-500 group-hover:scale-110" />
+
+                <div className="relative z-10 mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 text-primary ring-1 ring-primary/20 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                  <Icon className="h-6 w-6" strokeWidth={1.9} />
                 </div>
-                <p className="text-3xl font-bold text-primary group-hover:scale-110 transition-transform duration-300">
-                  {stat.value}
+
+                <p className="relative z-10 text-4xl font-black tracking-tight text-primary transition-transform duration-300 group-hover:scale-105">
+                  {animatedStats[index]}
+                  {stat.suffix}
                 </p>
-                <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
+                <p className="relative z-10 mt-2 text-sm font-medium text-muted-foreground">{stat.label}</p>
               </div>
             )
           })}
@@ -354,16 +382,23 @@ export function AboutContent() {
             Notre approche
           </Badge>
           
-          <div className="relative rounded-3xl border border-border/50 bg-white/70 backdrop-blur-sm p-12 shadow-xl overflow-hidden">
+          <div className="group relative overflow-hidden rounded-3xl border border-border/50 bg-white/80 p-12 shadow-xl backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] via-transparent to-primary/[0.03] opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-primary/50 to-primary" />
+            <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-primary/10 blur-3xl transition-transform duration-700 group-hover:scale-110" />
             
-            <p className="text-xl leading-relaxed text-muted-foreground max-w-3xl mx-auto">
+            <p className="relative z-10 text-xl leading-relaxed text-muted-foreground max-w-3xl mx-auto">
               Nous combinons expertise pédagogique et innovation pour offrir des formations qui transforment les compétences et accélèrent les carrières.
             </p>
             
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
-              {["Expertise", "Innovation", "Pédagogie", "Résultats"].map((item) => (
-                <Badge key={item} variant="secondary" className="px-4 py-2 text-sm bg-white/50">
+            <div className="relative z-10 mt-8 flex flex-wrap justify-center gap-4">
+              {["Expertise", "Innovation", "Pédagogie", "Résultats"].map((item, index) => (
+                <Badge
+                  key={item}
+                  variant="secondary"
+                  className="border border-primary/20 bg-white/85 px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:bg-white hover:shadow-md"
+                  style={{ animationDelay: `${index * 120}ms` }}
+                >
                   {item}
                 </Badge>
               ))}

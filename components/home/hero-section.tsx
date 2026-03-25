@@ -1,7 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Play } from "lucide-react"
+import {
+  ArrowRight,
+  Play,
+  Award,
+  Building2,
+  Globe2,
+  GraduationCap,
+  SlidersHorizontal,
+  Handshake,
+} from "lucide-react"
 import { sltHomeContent } from "@/lib/slt-content"
 import { useEffect, useRef, useState } from "react"
 
@@ -123,8 +132,17 @@ export function HeroSection() {
     return circles
   }
 
+  const statIcons = [
+    Award,
+    Building2,
+    Globe2,
+    GraduationCap,
+    SlidersHorizontal,
+    Handshake,
+  ]
+
   return (
-    <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-gradient-to-b from-background via-background to-white">
+    <section className="relative z-10 flex min-h-[90vh] items-center overflow-hidden bg-gradient-to-b from-background/35 via-background/25 to-white">
       {/* Dégradé de transition vers le blanc en bas - plus léger sur mobile */}
       <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white via-white/60 to-transparent pointer-events-none z-10" />
       <div className="absolute bottom-0 left-0 right-0 h-24 bg-white/80 pointer-events-none z-10" />
@@ -217,32 +235,62 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right - Stats card cluster - caché sur mobile */}
-          <div className="hidden lg:block">
+          {/* Right - Stats card cluster animé (mobile + desktop) */}
+          <div className="block">
             <div className="relative">
-              <div className="rounded-2xl border border-border/50 bg-white/70 backdrop-blur-md p-8 shadow-xl animate-fade-in-up [animation-delay:200ms] hover:shadow-2xl transition-all duration-500">
-                <div className="grid grid-cols-2 gap-8">
-                  {sltHomeContent.hero.stats.map((stat) => (
-                    <div key={stat.label} className="text-center group">
-                      <p className="text-3xl font-bold text-primary group-hover:scale-110 transition-transform duration-300">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+              <div className="rounded-3xl border border-border/50 bg-white/70 backdrop-blur-md p-5 sm:p-6 lg:p-8 shadow-xl animate-fade-in-up [animation-delay:200ms] hover:shadow-2xl transition-all duration-500">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:gap-5">
+                  {sltHomeContent.hero.stats.map((stat, index) => (
+                    <div
+                      key={stat.label}
+                      className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/65 p-4 shadow-md backdrop-blur-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl"
+                    >
+                      <div
+                        className={`absolute inset-0 opacity-90 transition-all duration-500 group-hover:opacity-100 ${
+                          index % 4 === 0
+                            ? "bg-gradient-to-br from-cyan-100/80 via-blue-100/70 to-indigo-100/60"
+                            : index % 4 === 1
+                              ? "bg-gradient-to-br from-violet-100/80 via-fuchsia-100/70 to-pink-100/60"
+                              : index % 4 === 2
+                                ? "bg-gradient-to-br from-emerald-100/80 via-teal-100/70 to-cyan-100/60"
+                                : "bg-gradient-to-br from-amber-100/80 via-orange-100/70 to-rose-100/60"
+                        }`}
+                      />
+                      <div className="absolute -right-5 -top-5 h-16 w-16 rounded-full bg-white/40 blur-xl transition-all duration-500 group-hover:scale-125" />
+                      <div className="relative z-10">
+                        {(() => {
+                          const StatIcon = statIcons[index % statIcons.length]
+                          return (
+                            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-white/50 via-white/20 to-white/5 text-slate-700 shadow-[0_8px_28px_rgba(15,23,42,0.14)] ring-1 ring-white/60 backdrop-blur-md transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:from-primary group-hover:via-primary/85 group-hover:to-primary/65 group-hover:text-primary-foreground group-hover:ring-primary/45">
+                              <StatIcon className="h-5 w-5" strokeWidth={1.9} />
+                            </div>
+                          )
+                        })()}
+                        <p className="text-lg font-black leading-tight text-slate-800 sm:text-xl lg:text-2xl group-hover:scale-[1.03] transition-transform duration-300">
+                          {stat.value}
+                        </p>
+                        <p className="mt-1 text-xs font-medium text-slate-600 sm:text-sm">
+                          {stat.label}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              <div className="absolute -bottom-6 -left-6 rounded-xl border border-border/50 bg-white/70 backdrop-blur-md p-4 shadow-xl animate-fade-in-up [animation-delay:500ms] hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
+              <div className="relative mt-4 w-full rounded-xl border border-border/50 bg-white/90 p-3 shadow-md backdrop-blur-md transition-all duration-500 hover:shadow-lg sm:mt-5 sm:p-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-green-400/20 to-green-500/30 text-green-600 backdrop-blur-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-green-400/25 via-emerald-400/20 to-green-500/35 text-green-700 backdrop-blur-sm ring-1 ring-green-500/20">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{sltHomeContent.hero.certifiedTitle}</p>
-                    <p className="text-xs text-muted-foreground">{sltHomeContent.hero.certifiedSubtitle}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold leading-tight text-foreground">
+                      {sltHomeContent.hero.certifiedTitle}
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      {sltHomeContent.hero.certifiedSubtitle}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -316,6 +364,7 @@ export function HeroSection() {
             min-height: 80vh;
           }
         }
+
       `}</style>
     </section>
   )

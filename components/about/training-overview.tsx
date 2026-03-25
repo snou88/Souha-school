@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { 
   GraduationCap,
   Brain,
@@ -10,9 +10,7 @@ import {
   LineChart,
   Globe,
   Sparkles,
-  Clock,
   Award,
-  ArrowRight,
   Target,
   Lightbulb,
   Heart,
@@ -20,8 +18,6 @@ import {
 } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 import { sltHomeContent } from "@/lib/slt-content"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 
 // Couleurs modernes et douces
 const cardColors = [
@@ -67,6 +63,17 @@ const backgroundCircles = [
   { size: 120, top: 10, left: 5, color: 'bg-indigo-100/30', blur: 'blur-3xl' },
   { size: 150, top: 60, right: 10, color: 'bg-amber-100/30', blur: 'blur-3xl' },
   { size: 100, bottom: 20, left: 20, color: 'bg-emerald-100/30', blur: 'blur-3xl' },
+]
+
+const decorativeDots = [
+  { top: 8, left: 12, opacity: 0.24 },
+  { top: 16, left: 78, opacity: 0.2 },
+  { top: 28, left: 36, opacity: 0.26 },
+  { top: 44, left: 68, opacity: 0.18 },
+  { top: 58, left: 22, opacity: 0.22 },
+  { top: 74, left: 82, opacity: 0.2 },
+  { top: 86, left: 42, opacity: 0.25 },
+  { top: 35, left: 90, opacity: 0.16 },
 ]
 
 export function TrainingOverview() {
@@ -119,14 +126,14 @@ export function TrainingOverview() {
 
       {/* Petits points décoratifs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {decorativeDots.map((dot, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-primary/20 rounded-full"
+            className="absolute h-1 w-1 rounded-full bg-primary/25"
             style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              opacity: 0.3 + Math.random() * 0.3,
+              top: `${dot.top}%`,
+              left: `${dot.left}%`,
+              opacity: dot.opacity,
             }}
           />
         ))}
@@ -161,14 +168,16 @@ export function TrainingOverview() {
               return (
                 <div
                   key={item}
-                  className="group relative bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white/90 p-5 shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-primary/[0.03] opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+                  <div className={`absolute left-0 right-0 top-0 h-0.5 bg-gradient-to-r ${colors.gradient} opacity-90`} />
                   <div className="flex items-start gap-4">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colors.primary} group-hover:scale-110 transition-transform`}>
+                    <div className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-lg ${colors.primary} ring-1 ring-black/5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                       <Icon className={`h-5 w-5 ${colors.icon}`} />
                     </div>
                     
-                    <div className="flex-1">
+                    <div className="relative z-10 flex-1">
                       <p className="text-sm font-medium text-slate-900 mb-2">{item}</p>
                       
                       <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -207,8 +216,8 @@ export function TrainingOverview() {
             const colors = cardColors.find(c => c.text.includes(item.color)) || cardColors[0]
             
             return (
-              <div key={item.title} className="text-center group">
-                <div className={`inline-flex p-3 rounded-full ${colors.primary} mb-4 group-hover:scale-110 transition-transform`}>
+              <div key={item.title} className="group rounded-2xl border border-border/50 bg-white/75 p-6 text-center shadow-sm backdrop-blur-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl">
+                <div className={`inline-flex rounded-full p-3 ${colors.primary} mb-4 ring-1 ring-black/5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                   <item.icon className={`h-6 w-6 ${colors.icon}`} />
                 </div>
                 <h4 className="text-lg font-semibold text-slate-900 mb-2">{item.title}</h4>

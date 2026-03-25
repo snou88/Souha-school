@@ -44,6 +44,29 @@ const contactInfo = [
   },
 ] as const;
 
+const infoCardStyles = [
+  {
+    iconWrap:
+      "bg-gradient-to-br from-blue-500/20 via-blue-500/10 to-blue-500/5 text-blue-700 ring-blue-500/25",
+    glow: "from-blue-100/80 via-blue-50/40 to-transparent",
+  },
+  {
+    iconWrap:
+      "bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 text-emerald-700 ring-emerald-500/25",
+    glow: "from-emerald-100/80 via-emerald-50/40 to-transparent",
+  },
+  {
+    iconWrap:
+      "bg-gradient-to-br from-violet-500/20 via-violet-500/10 to-violet-500/5 text-violet-700 ring-violet-500/25",
+    glow: "from-violet-100/80 via-violet-50/40 to-transparent",
+  },
+  {
+    iconWrap:
+      "bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-amber-500/5 text-amber-700 ring-amber-500/25",
+    glow: "from-amber-100/80 via-amber-50/40 to-transparent",
+  },
+] as const;
+
 interface FormErrors {
   name?: string;
   email?: string;
@@ -108,8 +131,12 @@ export function ContactContent() {
   }
 
   return (
-    <div className="bg-background pb-24 pt-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="relative overflow-hidden bg-gradient-to-b from-background via-background to-white pb-24 pt-32">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-20 top-16 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -right-16 bottom-20 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl" />
+      </div>
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center animate-on-scroll">
           <span className="text-sm font-semibold uppercase tracking-wider text-primary">
@@ -128,15 +155,18 @@ export function ContactContent() {
           {/* Contact info - left */}
           <div className="lg:col-span-2">
             <div className="stagger-children flex flex-col gap-6">
-              {contactInfo.map((item) => (
+              {contactInfo.map((item, index) => {
+                const styles = infoCardStyles[index % infoCardStyles.length];
+                return (
                 <div
                   key={item.title}
-                  className="animate-on-scroll flex items-start gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="animate-on-scroll group relative flex items-start gap-4 overflow-hidden rounded-2xl border border-border/70 bg-white/85 p-5 shadow-sm backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <item.icon className="h-5 w-5" />
+                  <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 transition-opacity duration-500 group-hover:opacity-90", styles.glow)} />
+                  <div className={cn("relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", styles.iconWrap)}>
+                    <item.icon className="h-5 w-5" strokeWidth={2} />
                   </div>
-                  <div>
+                  <div className="relative z-10">
                     <h3 className="text-sm font-semibold text-foreground">
                       {item.title}
                     </h3>
@@ -164,16 +194,18 @@ export function ContactContent() {
                     )}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
 
           {/* Form - right */}
           <div className="lg:col-span-3">
-            <div className="animate-on-scroll rounded-xl border border-border bg-card p-8 shadow-sm">
+            <div className="animate-on-scroll relative overflow-hidden rounded-2xl border border-border/70 bg-white/90 p-8 shadow-md backdrop-blur-sm">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-transparent" />
+              <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-primary/70 via-primary/40 to-primary/70" />
               {submitted ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in-up">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
+                <div className="relative z-10 flex flex-col items-center justify-center py-12 text-center animate-fade-in-up">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-50 ring-1 ring-green-200">
                     <CheckCircle2 className="h-8 w-8 text-green-600" />
                   </div>
                   <h3 className="mt-6 text-xl font-bold text-foreground">
@@ -202,7 +234,7 @@ export function ContactContent() {
                   onSubmit={handleSubmit}
                   noValidate
                   id="contact-form"
-                  className="flex flex-col gap-6"
+                  className="relative z-10 flex flex-col gap-6"
                 >
                   {errors.form && (
                     <p className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -321,7 +353,7 @@ export function ContactContent() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="inline-flex items-center justify-center gap-2 self-start rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 self-start rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Send className="h-4 w-4" />
                     {loading ? "Envoi en cours…" : "Envoyer le message"}
@@ -333,7 +365,7 @@ export function ContactContent() {
         </div>
 
         {/* Map avec Google Maps iframe */}
-        <div className="mt-16 overflow-hidden rounded-xl border border-border shadow-sm">
+        <div className="mt-16 overflow-hidden rounded-2xl border border-border/70 bg-white/80 shadow-md backdrop-blur-sm">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d199.80932610909935!2d2.9864058231843993!3d36.74778999494874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzbCsDQ0JzUyLjEiTiAywrA1OScxMS44IkU!5e0!3m2!1sfr!2sdz!4v1770982457442!5m2!1sfr!2sdz"
             width="100%"
@@ -341,7 +373,7 @@ export function ContactContent() {
             style={{ border: 0 }}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            className="w-full h-80"
+            className="h-80 w-full"
           ></iframe>
         </div>
       </div>

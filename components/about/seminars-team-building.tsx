@@ -1,20 +1,16 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { 
   Users2, 
   ListChecks, 
-  Sparkles,
   Calendar,
   MapPin,
-  Clock,
   Users,
-  ArrowRight
 } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 import { sltHomeContent } from "@/lib/slt-content"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 
 // Couleurs douces pour le site éducatif
 const cardColors = [
@@ -101,10 +97,12 @@ export function SeminarsTeamBuilding() {
         {/* Cartes principales */}
         <div className="mt-16 grid gap-8 lg:grid-cols-2">
           {/* Carte des types de séminaires */}
-          <div className="animate-on-scroll group relative rounded-2xl border border-border/50 bg-white p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div className="animate-on-scroll group relative overflow-hidden rounded-2xl border border-border/50 bg-white/90 p-8 shadow-md transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/60 via-transparent to-white opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+            <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-blue-400" />
             {/* En-tête */}
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-200/60 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
                 <Users2 className="h-7 w-7" />
               </div>
               <div>
@@ -114,11 +112,11 @@ export function SeminarsTeamBuilding() {
             </div>
 
             {/* Liste des types */}
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="relative z-10 mt-6 grid gap-3 sm:grid-cols-2">
               {sltHomeContent.seminars.types.map((type, index) => (
                 <div
                   key={type}
-                  className="flex items-center gap-3 rounded-lg border border-border/50 bg-secondary/20 p-3 transition-all hover:border-blue-200 hover:bg-blue-50/30"
+                  className="flex items-center gap-3 rounded-lg border border-border/50 bg-secondary/20 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50/40"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                     <Calendar className="h-4 w-4" />
@@ -129,7 +127,7 @@ export function SeminarsTeamBuilding() {
             </div>
 
             {/* Infos pratiques */}
-            <div className="mt-6 flex items-center justify-between border-t border-border/50 pt-4 text-sm text-muted-foreground">
+            <div className="relative z-10 mt-6 flex items-center justify-between border-t border-border/50 pt-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
                 <span>Présentiel</span>
@@ -138,10 +136,12 @@ export function SeminarsTeamBuilding() {
           </div>
 
           {/* Carte des thèmes */}
-          <div className="animate-on-scroll group relative rounded-2xl border border-border/50 bg-white p-8 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          <div className="animate-on-scroll group relative overflow-hidden rounded-2xl border border-border/50 bg-white/90 p-8 shadow-md transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/60 via-transparent to-white opacity-80 transition-opacity duration-500 group-hover:opacity-100" />
+            <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-emerald-400" />
             {/* En-tête */}
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200/60 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
                 <ListChecks className="h-7 w-7" />
               </div>
               <div>
@@ -151,11 +151,11 @@ export function SeminarsTeamBuilding() {
             </div>
 
             {/* Liste des thèmes */}
-            <div className="mt-6 space-y-2">
+            <div className="relative z-10 mt-6 space-y-2">
               {sltHomeContent.seminars.themes.map((theme, index) => (
                 <div
                   key={theme}
-                  className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/20 p-3 transition-all hover:border-emerald-200 hover:bg-emerald-50/30"
+                  className="flex items-center justify-between rounded-lg border border-border/50 bg-secondary/20 p-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50/40"
                 >
                   <span className="text-sm text-foreground">{theme}</span>
                 </div>
@@ -163,7 +163,7 @@ export function SeminarsTeamBuilding() {
             </div>
 
             {/* Participants */}
-            <div className="mt-6 flex items-center gap-2 border-t border-border/50 pt-4 text-sm text-muted-foreground">
+            <div className="relative z-10 mt-6 flex items-center gap-2 border-t border-border/50 pt-4 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
               <span>Groupes de 8 à 20 personnes</span>
             </div>

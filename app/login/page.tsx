@@ -18,20 +18,19 @@ export default function AdminLogin() {
 
   // Vérifier si déjà connecté
   useEffect(() => {
-    checkAuth()
-  }, [])
-
-  const checkAuth = async () => {
-    try {
-      const res = await fetch("/api/admin/login")
-      const data = await res.json()
-      if (data.authenticated) {
-        router.push("/admin")
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/admin/login")
+        const data = await res.json()
+        if (data.authenticated) {
+          router.push("/admin")
+        }
+      } catch (error) {
+        console.error("Erreur de vérification:", error)
       }
-    } catch (error) {
-      console.error("Erreur de vérification:", error)
     }
-  }
+    void checkAuth()
+  }, [router])
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()

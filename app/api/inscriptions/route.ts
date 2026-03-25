@@ -17,7 +17,7 @@ const isTransientFetchError = (error: any) => {
 }
 
 async function withRetry<T>(
-  operation: () => Promise<{ data: T | null; error: any }>
+  operation: () => PromiseLike<{ data: T | null; error: any }>
 ): Promise<{ data: T | null; error: any }> {
   let lastResult: { data: T | null; error: any } = { data: null, error: null }
 
@@ -68,20 +68,32 @@ export async function GET() {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
+    type StudentRow = { type?: string; name?: string; email?: string; number?: number }
+    type FormationRow = { name?: string }
+
+    const firstOf = <T>(rel: T | T[] | null | undefined): T | undefined => {
+      if (rel == null) return undefined
+      return Array.isArray(rel) ? rel[0] : rel
+    }
+
     // Transformer les données pour le frontend
-    const formattedData = data.map(item => ({
-      id: item.id,
-      type: item.students?.type || 'Individual',
-      name: item.students?.name || '',
-      email: item.students?.email || '',
-      formation: item.formations?.name || '',
-      date: new Date(item.created_at).toLocaleDateString('fr-FR', {
-        year: 'numeric', 
-        month: 'long' 
-      }),
-      number: item.students?.number || 1,
-      status: item.status || 'Pending'
-    }))
+    const formattedData = (data ?? []).map((item) => {
+      const student = firstOf<StudentRow>(item.students as StudentRow | StudentRow[] | null)
+      const formation = firstOf<FormationRow>(item.formations as FormationRow | FormationRow[] | null)
+      return {
+        id: item.id,
+        type: student?.type || 'Individual',
+        name: student?.name || '',
+        email: student?.email || '',
+        formation: formation?.name || '',
+        date: new Date(item.created_at).toLocaleDateString('fr-FR', {
+          year: 'numeric',
+          month: 'long',
+        }),
+        number: student?.number ?? 1,
+        status: item.status || 'Pending',
+      }
+    })
 
     return NextResponse.json({ success: true, data: formattedData })
   } catch (err) {
@@ -104,13 +116,8 @@ export async function POST(request: Request) {
     }
 
     // 1. Trouver l'ID de la formation
-    const { data: formationData, error: formationError } = await withRetry(
-      () =>
-        supabaseAdmin
-          .from('formations')
-          .select('id')
-          .eq('name', formation)
-          .single()
+    const { data: formationData, error: formationError } = await withRetry<{ id: number }>(() =>
+      supabaseAdmin.from('formations').select('id').eq('name', formation).single()
     )
 
     if (formationError || !formationData) {
@@ -126,22 +133,25 @@ export async function POST(request: Request) {
       }, { status: 404 })
     }
 
+    const formationRow = formationData
+
     // 2. Créer l'étudiant
-    const { data: studentData, error: studentError } = await withRetry(
-      () =>
-        supabaseAdmin
-          .from('students')
-          .insert([{
+    const { data: studentData, error: studentError } = await withRetry(() =>
+      supabaseAdmin
+        .from('students')
+        .insert([
+          {
             type,
             name,
             email,
             phone: phone || null,
             number: number || 1,
-            formation_id: formationData.id,
-            status: 'Pending' // Les étudiants commencent avec status Pending
-          }])
-          .select()
-          .single()
+            formation_id: formationRow.id,
+            status: 'Pending', // Les étudiants commencent avec status Pending
+          },
+        ])
+        .select()
+        .single()
     )
 
     if (studentError) {
@@ -154,18 +164,24 @@ export async function POST(request: Request) {
       }, { status: isTransientFetchError(studentError) ? 503 : 500 })
     }
 
+    const studentRow = studentData as { id: number } | null
+    if (!studentRow) {
+      return NextResponse.json({ success: false, error: "Étudiant non créé." }, { status: 500 })
+    }
+
     // 3. Créer l'inscription
-    const { data: inscriptionData, error: inscriptionError } = await withRetry(
-      () =>
-        supabaseAdmin
-          .from('inscriptions')
-          .insert([{
-            student_id: studentData.id,
-            formation_id: formationData.id,
-            status: status || 'Pending'
-          }])
-          .select()
-          .single()
+    const { data: inscriptionData, error: inscriptionError } = await withRetry(() =>
+      supabaseAdmin
+        .from('inscriptions')
+        .insert([
+          {
+            student_id: studentRow.id,
+            formation_id: formationRow.id,
+            status: status || 'Pending',
+          },
+        ])
+        .select()
+        .single()
     )
 
     if (inscriptionError) {
@@ -199,12 +215,12 @@ export async function POST(request: Request) {
       console.warn('[inscriptions] Notification admin non envoyée:', notifResult.error)
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       data: {
-        student: studentData,
-        inscription: inscriptionData
-      }
+        student: studentRow,
+        inscription: inscriptionData,
+      },
     })
 
   } catch (err) {
@@ -227,17 +243,16 @@ export async function PUT(request: Request) {
     }
 
     // Mettre à jour l'inscription
-    const { data: inscription, error: inscriptionError } = await withRetry(
-      () =>
-        supabaseAdmin
-          .from('inscriptions')
-          .update({
-            status,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', id)
-          .select()
-          .single()
+    const { data: inscription, error: inscriptionError } = await withRetry(() =>
+      supabaseAdmin
+        .from('inscriptions')
+        .update({
+          status,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single()
     )
 
     if (inscriptionError) {
@@ -250,17 +265,21 @@ export async function PUT(request: Request) {
       }, { status: isTransientFetchError(inscriptionError) ? 503 : 500 })
     }
 
+    const inscriptionRow = inscription as {
+      student_id?: number
+      formation_id?: number
+    } | null
+
     // Si le statut est "Approved", mettre à jour l'étudiant en "Active" et envoyer l'email d'admission
-    if (status === "Approved" && inscription?.student_id) {
-      const { error: studentUpdateError } = await withRetry(
-        () =>
-          supabaseAdmin
-            .from('students')
-            .update({
-              status: 'Active',
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', inscription.student_id)
+    if (status === "Approved" && inscriptionRow?.student_id) {
+      const { error: studentUpdateError } = await withRetry(() =>
+        supabaseAdmin
+          .from('students')
+          .update({
+            status: 'Active',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', inscriptionRow.student_id)
       )
 
       if (studentUpdateError) {
@@ -268,8 +287,8 @@ export async function PUT(request: Request) {
       } else {
         // Récupérer nom, email de l'étudiant et nom de la formation pour l'email d'admission
         const [studentRes, formationRes] = await Promise.all([
-          supabaseAdmin.from('students').select('name, email').eq('id', inscription.student_id).single(),
-          supabaseAdmin.from('formations').select('name').eq('id', inscription.formation_id).single(),
+          supabaseAdmin.from('students').select('name, email').eq('id', inscriptionRow.student_id).single(),
+          supabaseAdmin.from('formations').select('name').eq('id', inscriptionRow.formation_id).single(),
         ])
         const studentData = studentRes.data
         const formationData = formationRes.data
@@ -287,16 +306,15 @@ export async function PUT(request: Request) {
     }
 
     // Si le statut est "Rejected", mettre à jour l'étudiant en "Inactive"
-    if (status === "Rejected" && inscription?.student_id) {
-      const { error: studentUpdateError } = await withRetry(
-        () =>
-          supabaseAdmin
-            .from('students')
-            .update({
-              status: 'Inactive',
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', inscription.student_id)
+    if (status === "Rejected" && inscriptionRow?.student_id) {
+      const { error: studentUpdateError } = await withRetry(() =>
+        supabaseAdmin
+          .from('students')
+          .update({
+            status: 'Inactive',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', inscriptionRow.student_id)
       )
 
       if (studentUpdateError) {
@@ -304,7 +322,7 @@ export async function PUT(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, data: inscription })
+    return NextResponse.json({ success: true, data: inscriptionRow })
   } catch (err) {
     console.error('Unexpected error:', err)
     return NextResponse.json({ success: false, error: "Erreur interne du serveur" }, { status: 500 })

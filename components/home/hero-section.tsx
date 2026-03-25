@@ -12,12 +12,14 @@ import {
   Handshake,
 } from "lucide-react"
 import { sltHomeContent } from "@/lib/slt-content"
+import type { ReactNode } from "react"
 import { useEffect, useRef, useState } from "react"
 
 export function HeroSection() {
   const circlesRef = useRef<HTMLDivElement>(null)
   const floatingCirclesRef = useRef<HTMLDivElement>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [floatingCircleNodes, setFloatingCircleNodes] = useState<ReactNode[]>([])
 
   useEffect(() => {
     // Détecter si c'est un mobile
@@ -53,29 +55,27 @@ export function HeroSection() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isMobile])
 
-  // Générer des positions pour les petits cercles
-  const generateCircles = () => {
-    const circles = []
-    
-    // Sur mobile : cercles bien visibles
+  useEffect(() => {
+    const circles: ReactNode[] = []
+
     if (isMobile) {
       const mobileColors = [
-        'bg-blue-300/40',
-        'bg-blue-400/35',
-        'bg-blue-500/30',
-        'bg-blue-200/45',
-        'bg-blue-600/25',
-        'bg-blue-700/20',
+        "bg-blue-300/40",
+        "bg-blue-400/35",
+        "bg-blue-500/30",
+        "bg-blue-200/45",
+        "bg-blue-600/25",
+        "bg-blue-700/20",
       ]
-      
+
       for (let i = 0; i < 20; i++) {
-        const size = Math.floor(Math.random() * 45) + 15 // 15-60px
+        const size = Math.floor(Math.random() * 45) + 15
         const top = Math.random() * 100
         const left = Math.random() * 100
         const delay = Math.random() * 3
         const duration = 12 + Math.random() * 12
         const color = mobileColors[Math.floor(Math.random() * mobileColors.length)]
-        
+
         circles.push(
           <div
             key={`mobile-${i}`}
@@ -86,51 +86,50 @@ export function HeroSection() {
               top: `${top}%`,
               left: `${left}%`,
               animation: `float-circle-mobile ${duration}s ease-in-out ${delay}s infinite`,
-              opacity: 0.35 + Math.random() * 0.3, // 0.35-0.65
+              opacity: 0.35 + Math.random() * 0.3,
             }}
-          />
+          />,
         )
       }
-      return circles
+    } else {
+      const desktopColors = [
+        "bg-blue-400/30",
+        "bg-blue-500/20",
+        "bg-blue-300/40",
+        "bg-blue-600/15",
+        "bg-blue-400/25",
+        "bg-blue-500/30",
+        "bg-blue-300/20",
+        "bg-blue-600/10",
+      ]
+
+      for (let i = 0; i < 30; i++) {
+        const size = Math.floor(Math.random() * 40) + 15
+        const top = Math.random() * 100
+        const left = Math.random() * 100
+        const delay = Math.random() * 5
+        const duration = 8 + Math.random() * 12
+        const color = desktopColors[Math.floor(Math.random() * desktopColors.length)]
+
+        circles.push(
+          <div
+            key={`desktop-${i}`}
+            className={`absolute rounded-full ${color} blur-sm`}
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              top: `${top}%`,
+              left: `${left}%`,
+              animation: `float-circle ${duration}s ease-in-out ${delay}s infinite`,
+              opacity: 0.3 + Math.random() * 0.4,
+            }}
+          />,
+        )
+      }
     }
-    
-    // Sur desktop : garder le design original
-    const desktopColors = [
-      'bg-blue-400/30',
-      'bg-blue-500/20',
-      'bg-blue-300/40',
-      'bg-blue-600/15',
-      'bg-blue-400/25',
-      'bg-blue-500/30',
-      'bg-blue-300/20',
-      'bg-blue-600/10'
-    ]
-    
-    for (let i = 0; i < 30; i++) {
-      const size = Math.floor(Math.random() * 40) + 15
-      const top = Math.random() * 100
-      const left = Math.random() * 100
-      const delay = Math.random() * 5
-      const duration = 8 + Math.random() * 12
-      const color = desktopColors[Math.floor(Math.random() * desktopColors.length)]
-      
-      circles.push(
-        <div
-          key={`desktop-${i}`}
-          className={`absolute rounded-full ${color} blur-sm`}
-          style={{
-            width: `${size}px`,
-            height: `${size}px`,
-            top: `${top}%`,
-            left: `${left}%`,
-            animation: `float-circle ${duration}s ease-in-out ${delay}s infinite`,
-            opacity: 0.3 + Math.random() * 0.4,
-          }}
-        />
-      )
-    }
-    return circles
-  }
+
+    setFloatingCircleNodes(circles)
+  }, [isMobile])
 
   const statIcons = [
     Award,
@@ -153,7 +152,7 @@ export function HeroSection() {
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
       >
-        {generateCircles()}
+        {floatingCircleNodes}
       </div>
 
       {/* Grands cercles avec effet de parallaxe - uniquement sur desktop */}

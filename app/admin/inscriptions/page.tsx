@@ -260,7 +260,15 @@ function InscriptionsAdminContent() {
           />
         </div>
 
-        <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => {
+            if (v === "all" || v === "Pending" || v === "Approved" || v === "Rejected") {
+              setStatusFilter(v)
+              setPage(1)
+            }
+          }}
+        >
           <SelectTrigger className="h-9 w-36 text-sm">
             <SelectValue placeholder="Tous les statuts" />
           </SelectTrigger>

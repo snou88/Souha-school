@@ -243,8 +243,8 @@ export function FormationsContent() {
         // Extraire les catégories uniques
         const uniqueCategories = activeFormations
           .map((f: Formation) => f.categories?.name?.trim())
-          .filter((name): name is string => Boolean(name))
-          .filter((name, index, self) => self.indexOf(name) === index)
+          .filter((name: string | undefined): name is string => Boolean(name))
+          .filter((name: string, index: number, self: string[]) => self.indexOf(name) === index)
 
         setCategories(["Toutes", ...uniqueCategories])
       }

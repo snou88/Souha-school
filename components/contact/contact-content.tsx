@@ -12,7 +12,16 @@ const mapAddressHref = `https://www.google.com/maps/search/?api=1&query=${encode
 
 const normalizePhoneForTel = (phone: string) => phone.replace(/[^\d+]/g, "");
 
-const contactInfo = [
+type ContactLine = { label: string; href?: string };
+
+type ContactInfoBlock = {
+  icon: typeof MapPin;
+  title: string;
+  subtitle?: string;
+  lines: ContactLine[];
+};
+
+const contactInfo: ContactInfoBlock[] = [
   {
     icon: MapPin,
     title: "Adresse",
@@ -42,7 +51,7 @@ const contactInfo = [
       { label: "Samedi : 10:00 - 14:00" },
     ],
   },
-] as const;
+];
 
 const infoCardStyles = [
   {
@@ -176,7 +185,7 @@ export function ContactContent() {
                       </p>
                     )}
                     {item.lines.map((line) =>
-                      line.href ? (
+                      line.href != null && line.href !== "" ? (
                         <a
                           key={line.label}
                           href={line.href}

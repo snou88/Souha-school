@@ -141,18 +141,15 @@ export function ContactContent() {
       ref={sectionRef}
       className="relative -mt-px overflow-hidden bg-cover bg-no-repeat pb-24 pt-32"
       style={{
-        backgroundImage: isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
+        backgroundImage: isMobile ? "url('/image/background-tel.png')" : "url('/image/background.png')",
         backgroundPosition: isMobile ? "center top" : "center",
       }}
     >
+      {/* Dégradé en bas - fond vers transparent */}
+      <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-white via-white/95 via-30% to-transparent pointer-events-none z-10" />
+      
       {/* Overlay pour améliorer la lisibilité */}
       <div className="absolute inset-0 pointer-events-none" />
-      
-      {/* Effets décoratifs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-20 top-16 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute -right-16 bottom-20 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl" />
-      </div>
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-20">
         {/* Header */}

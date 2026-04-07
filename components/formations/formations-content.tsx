@@ -224,10 +224,10 @@ export function FormationsContent() {
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse mr-2" />
               Catalogue 2026
             </Badge>
-            <h1 className="text-balance text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-balance text-4xl font-bold tracking-tight text-black sm:text-5xl lg:text-6xl">
               Nos formations
             </h1>
-            <p className="mt-6 text-pretty text-lg leading-relaxed text-white/90 max-w-2xl mx-auto">
+            <p className="mt-6 text-pretty text-lg leading-relaxed text-black-90 max-w-2xl mx-auto">
               Des programmes conçus pour votre réussite professionnelle
             </p>
           </div>

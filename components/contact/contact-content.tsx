@@ -163,7 +163,7 @@ export function ContactContent() {
           <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-black sm:text-4xl lg:text-5xl">
             Parlons de votre projet
           </h1>
-          <p className="mt-4 text-pretty text-lg leading-relaxed text-black">
+          <p className="mt-4 text-pretty text-lg leading-relaxed text-black-90">
             Une question sur nos formations, séminaires ou accompagnements ? Notre équipe vous répond avec un accompagnement clair, rapide et personnalisé.
           </p>
         </div>

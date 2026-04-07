@@ -24,8 +24,8 @@ export function Footer() {
               className="flex items-center gap-2.5"
               aria-label="Accueil"
             >
-              <div className="w-50 h-20">
-                <img src={logo.src} alt="SLT Logo" className="w-full h-full" />
+              <div className="w-60">
+                <img src={logo.src} alt="SLT Logo" className="w-60" />
               </div>
               <span className="text-lg font-bold tracking-tight text-foreground"></span>
             </Link>

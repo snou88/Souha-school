@@ -208,7 +208,7 @@ export function FormationsContent() {
         }}
       >
         {/* Overlay pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none" />
         
         {/* Dégradé de transition */}
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />

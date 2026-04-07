@@ -28,10 +28,8 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled
-          ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border"
-          : "bg-transparent"
+        "fixed top-0 left-0 right-0 z-50 border-b border-border bg-white transition-shadow duration-300",
+        scrolled ? "shadow-sm" : "shadow-none"
       )}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
@@ -95,7 +93,7 @@ export function Navbar() {
           mobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 border-none"
         )}
       >
-        <div className="flex flex-col gap-1 px-6 pb-6">
+        <div className="flex flex-col gap-1 px-6 pb-6 bg-white">
           {links.map((link) => (
             <Link
               key={link.href}

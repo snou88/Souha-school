@@ -41,70 +41,6 @@ interface Formation {
   student_count?: number
 }
 
-// Couleurs disponibles pour les cartes (version claire)
-const cardColors = [
-  {
-    primary: "bg-blue-50",
-    secondary: "bg-blue-100",
-    text: "text-blue-600",
-    border: "border-blue-200",
-    shadow: "shadow-blue-100/50",
-    gradient: "from-blue-50 to-blue-100/50",
-    icon: "text-blue-500",
-    button: "bg-blue-50 hover:bg-blue-100 text-blue-600",
-    light: "bg-blue-500/5",
-    dot: "bg-blue-400"
-  },
-  {
-    primary: "bg-red-50",
-    secondary: "bg-red-100",
-    text: "text-red-600",
-    border: "border-red-200",
-    shadow: "shadow-red-100/50",
-    gradient: "from-red-50 to-red-100/50",
-    icon: "text-red-500",
-    button: "bg-red-50 hover:bg-red-100 text-red-600",
-    light: "bg-red-500/5",
-    dot: "bg-red-400"
-  },
-  {
-    primary: "bg-amber-50",
-    secondary: "bg-amber-100",
-    text: "text-amber-600",
-    border: "border-amber-200",
-    shadow: "shadow-amber-100/50",
-    gradient: "from-amber-50 to-amber-100/50",
-    icon: "text-amber-500",
-    button: "bg-amber-50 hover:bg-amber-100 text-amber-600",
-    light: "bg-amber-500/5",
-    dot: "bg-amber-400"
-  },
-  {
-    primary: "bg-purple-50",
-    secondary: "bg-purple-100",
-    text: "text-purple-600",
-    border: "border-purple-200",
-    shadow: "shadow-purple-100/50",
-    gradient: "from-purple-50 to-purple-100/50",
-    icon: "text-purple-500",
-    button: "bg-purple-50 hover:bg-purple-100 text-purple-600",
-    light: "bg-purple-500/5",
-    dot: "bg-purple-400"
-  },
-  {
-    primary: "bg-amber-800/10",
-    secondary: "bg-amber-800/20",
-    text: "text-amber-800",
-    border: "border-amber-800/20",
-    shadow: "shadow-amber-800/10",
-    gradient: "from-amber-800/5 to-amber-800/10",
-    icon: "text-amber-700",
-    button: "bg-amber-800/10 hover:bg-amber-800/20 text-amber-800",
-    light: "bg-amber-800/5",
-    dot: "bg-amber-600"
-  }
-]
-
 const getIcon = (categoryName: string) => {
   const name = categoryName.toLowerCase()
   if (name.includes("dev") || name.includes("développement")) return Code
@@ -168,6 +104,7 @@ async function getRecentFormations() {
 export default function HomePage() {
   const [latestThreeFormations, setLatestThreeFormations] = useState<Formation[]>([])
   const [loading, setLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null)
   const sectionRef = useRef<HTMLElement>(null)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
@@ -179,6 +116,16 @@ export default function HomePage() {
       setLoading(false)
     }
     load()
+  }, [])
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
   // Effet de scroll professionnel avec Intersection Observer
@@ -248,95 +195,6 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [loading])
 
-  // Effet de particules pour le background
-  useEffect(() => {
-    const canvas = document.createElement('canvas')
-    canvas.className = 'absolute inset-0 pointer-events-none'
-    canvas.style.opacity = '0.4'
-    const section = sectionRef.current
-    if (section) {
-      section.style.position = 'relative'
-      section.insertBefore(canvas, section.firstChild)
-    }
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    let particles: Array<{
-      x: number
-      y: number
-      size: number
-      speedX: number
-      speedY: number
-      color: string
-    }> = []
-
-    const colors = ['#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6', '#b45309']
-
-    const initParticles = () => {
-      if (!section) return
-      const rect = section.getBoundingClientRect()
-      canvas.width = rect.width
-      canvas.height = rect.height
-
-      for (let i = 0; i < 30; i++) {
-        particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 3 + 1,
-          speedX: (Math.random() - 0.5) * 0.5,
-          speedY: (Math.random() - 0.5) * 0.5,
-          color: colors[Math.floor(Math.random() * colors.length)]
-        })
-      }
-    }
-
-    const animateParticles = () => {
-      if (!ctx || !canvas) return
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      particles.forEach((particle) => {
-        particle.x += particle.speedX
-        particle.y += particle.speedY
-
-        if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1
-        if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1
-
-        ctx.beginPath()
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
-        ctx.fillStyle = particle.color
-        ctx.fill()
-        ctx.shadowColor = particle.color
-        ctx.shadowBlur = 10
-      })
-
-      requestAnimationFrame(animateParticles)
-    }
-
-    initParticles()
-    animateParticles()
-
-    const handleResize = () => {
-      if (!section) return
-      const rect = section.getBoundingClientRect()
-      canvas.width = rect.width
-      canvas.height = rect.height
-      particles = []
-      initParticles()
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      canvas.remove()
-    }
-  }, [])
-
-  // Assigner une couleur aléatoire à chaque carte
-  const getRandomColor = (index: number) => {
-    return cardColors[index % cardColors.length]
-  }
-
   return (
     <>
       <Navbar />
@@ -346,18 +204,13 @@ export default function HomePage() {
 
         <section
           ref={sectionRef}
-          className="relative bg-gradient-to-b from-background to-secondary/20 py-16 overflow-hidden"
+          className="relative -mt-px overflow-hidden bg-cover bg-no-repeat py-16"
+          style={{
+            backgroundImage:
+              isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
+            backgroundPosition: isMobile ? "center top" : "center",
+          }}
         >
-          {/* Effet de fond avec cercles animés */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200/20 rounded-full blur-3xl animate-pulse-slow" />
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl animate-pulse-slower" />
-            <div className="absolute top-40 right-40 w-60 h-60 bg-amber-200/20 rounded-full blur-3xl animate-float" />
-
-            {/* Grille de fond */}
-            <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
-          </div>
-
           <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center mb-12">
               <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-4 py-1.5 text-sm font-semibold text-primary">
@@ -382,7 +235,6 @@ export default function HomePage() {
                 latestThreeFormations.map((formation: Formation, index) => {
                   const Icon = getIcon(formation.categories?.name || "")
                   const descriptionLines = formatDescription(formation.description)
-                  const colors = getRandomColor(index)
 
                   return (
                     <div
@@ -390,34 +242,20 @@ export default function HomePage() {
                       ref={(el) => { cardsRef.current[index] = el }}
                       className="group relative flex flex-col rounded-2xl border border-border bg-white/80 backdrop-blur-sm shadow-xl transition-all duration-700 hover:shadow-2xl hover:-translate-y-2 overflow-hidden opacity-0 translate-y-10 card-hover"
                       style={{
-                        boxShadow: `0 20px 40px -15px ${colors.shadow.replace('shadow-', '')}`,
                         transitionDelay: `${index * 150}ms`
                       }}
                     >
-                      {/* Bande de couleur en haut avec animation */}
-                      <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${colors.gradient} animate-gradient-x`} />
-
-                      {/* Points de couleur décoratifs */}
-                      <div className="absolute top-3 left-3 flex gap-1">
-                        <span className={`h-2 w-2 rounded-full ${colors.dot} opacity-50`} />
-                        <span className={`h-2 w-2 rounded-full ${colors.dot} opacity-30`} />
-                        <span className={`h-2 w-2 rounded-full ${colors.dot} opacity-20`} />
-                      </div>
-
                       {/* Badge de catégorie */}
                       <div className="absolute right-4 top-4 z-10">
-                        <Badge
-                          variant="secondary"
-                          className={`${colors.light} ${colors.text} border-0 backdrop-blur-sm shadow-sm`}
-                        >
+                        <Badge variant="secondary" className="border-0 bg-muted/80 text-muted-foreground shadow-sm backdrop-blur-sm">
                           {formation.categories?.name || "Formation"}
                         </Badge>
                       </div>
 
                       {/* Contenu principal */}
                       <div className="p-6 pb-4">
-                        <div className={`card-icon mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${colors.primary} transition-all duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                          <Icon className={`h-7 w-7 ${colors.icon} transition-transform duration-500 group-hover:rotate-6`} />
+                        <div className="card-icon mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-muted transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                          <Icon className="h-7 w-7 text-primary transition-transform duration-500 group-hover:rotate-6" />
                         </div>
                         <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                           {formation.name}
@@ -430,7 +268,7 @@ export default function HomePage() {
                           <ul className="space-y-2">
                             {descriptionLines.slice(0, 2).map((line, idx) => (
                               <li key={idx} className="flex items-start gap-2 text-sm">
-                                <CheckCircle className={`mt-0.5 h-4 w-4 flex-shrink-0 ${colors.icon}`} />
+                                <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                                 <span className="text-muted-foreground line-clamp-1">{line}</span>
                               </li>
                             ))}
@@ -439,7 +277,7 @@ export default function HomePage() {
                             <button
                               type="button"
                               onClick={() => setSelectedFormation(formation)}
-                              className={`mt-2 text-xs font-medium ${colors.text} hover:underline transition-all`}
+                              className="mt-2 text-xs font-medium text-primary hover:underline transition-all"
                             >
                               + {descriptionLines.length - 2} autres points...
                             </button>
@@ -448,13 +286,13 @@ export default function HomePage() {
                       )}
 
                       {/* Informations supplémentaires avec espacement */}
-                      <div className={`mt-6 grid grid-cols-2 gap-4 border-t border-border ${colors.primary} p-4`}>
+                      <div className="mt-6 grid grid-cols-2 gap-4 border-t border-border bg-muted/30 p-4">
                         <div className="flex items-center gap-2">
-                          <Clock className={`h-4 w-4 ${colors.icon}`} />
+                          <Clock className="h-4 w-4 text-primary" />
                           <span className="text-sm font-medium text-foreground">{formation.duration}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Users className={`h-4 w-4 ${colors.icon}`} />
+                          <Users className="h-4 w-4 text-primary" />
                           <span className="text-sm font-medium text-foreground">Inscriptions ouvertes</span>
                         </div>
                       </div>
@@ -579,40 +417,6 @@ export default function HomePage() {
       </div>
 
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          25% { transform: translate(2%, -2%) rotate(2deg); }
-          50% { transform: translate(0, -4%) rotate(0deg); }
-          75% { transform: translate(-2%, -1%) rotate(-2deg); }
-        }
-        
-        .animate-float {
-          animation: float 20s ease-in-out infinite;
-        }
-
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 0.2; transform: scale(1); }
-          50% { opacity: 0.3; transform: scale(1.05); }
-        }
-        
-        .animate-pulse-slow {
-          animation: pulse-slow 8s ease-in-out infinite;
-        }
-        
-        .animate-pulse-slower {
-          animation: pulse-slow 12s ease-in-out infinite;
-        }
-
-        @keyframes gradient-x {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        
-        .animate-gradient-x {
-          background-size: 200% 200%;
-          animation: gradient-x 3s ease infinite;
-        }
-
         .card-visible {
           opacity: 1 !important;
           transform: translateY(0) !important;
@@ -626,13 +430,6 @@ export default function HomePage() {
           0% { transform: scale(0.8); opacity: 0; }
           50% { transform: scale(1.1); }
           100% { transform: scale(1); opacity: 1; }
-        }
-
-        .bg-grid-pattern {
-          background-image: 
-            linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
-          background-size: 50px 50px;
         }
       `}</style>
     </>

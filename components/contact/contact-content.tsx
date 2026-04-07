@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, useEffect, useRef } from "react";
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
@@ -59,21 +59,6 @@ const infoCardStyles = [
       "bg-gradient-to-br from-blue-500/20 via-blue-500/10 to-blue-500/5 text-blue-700 ring-blue-500/25",
     glow: "from-blue-100/80 via-blue-50/40 to-transparent",
   },
-  {
-    iconWrap:
-      "bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 text-emerald-700 ring-emerald-500/25",
-    glow: "from-emerald-100/80 via-emerald-50/40 to-transparent",
-  },
-  {
-    iconWrap:
-      "bg-gradient-to-br from-violet-500/20 via-violet-500/10 to-violet-500/5 text-violet-700 ring-violet-500/25",
-    glow: "from-violet-100/80 via-violet-50/40 to-transparent",
-  },
-  {
-    iconWrap:
-      "bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-amber-500/5 text-amber-700 ring-amber-500/25",
-    glow: "from-amber-100/80 via-amber-50/40 to-transparent",
-  },
 ] as const;
 
 interface FormErrors {
@@ -88,14 +73,26 @@ export function ContactContent() {
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     subject: "",
     message: "",
   });
+  const sectionRef = useRef<HTMLDivElement | null>(null);
 
   useScrollAnimation();
+
+  // Détecter si c'est mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   function validate(): FormErrors {
     const e: FormErrors = {};
@@ -140,21 +137,33 @@ export function ContactContent() {
   }
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-b from-background via-background to-white pb-24 pt-32">
+    <div
+      ref={sectionRef}
+      className="relative -mt-px overflow-hidden bg-cover bg-no-repeat pb-24 pt-32"
+      style={{
+        backgroundImage: isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
+        backgroundPosition: isMobile ? "center top" : "center",
+      }}
+    >
+      {/* Overlay pour améliorer la lisibilité */}
+      <div className="absolute inset-0 pointer-events-none" />
+      
+      {/* Effets décoratifs */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-20 top-16 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -left-20 top-16 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
         <div className="absolute -right-16 bottom-20 h-80 w-80 rounded-full bg-blue-200/20 blur-3xl" />
       </div>
-      <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-20">
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center animate-on-scroll">
-          <span className="text-sm font-semibold uppercase tracking-wider text-primary">
+          <span className="text-sm font-semibold uppercase tracking-wider text-black">
             Contact
           </span>
-          <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+          <h1 className="mt-3 text-balance text-3xl font-bold tracking-tight text-black sm:text-4xl lg:text-5xl">
             Parlons de votre projet
           </h1>
-          <p className="mt-4 text-pretty text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-4 text-pretty text-lg leading-relaxed text-black">
             Une question sur nos formations, séminaires ou accompagnements ? Notre équipe vous répond avec un accompagnement clair, rapide et personnalisé.
           </p>
         </div>
@@ -169,7 +178,7 @@ export function ContactContent() {
                 return (
                 <div
                   key={item.title}
-                  className="animate-on-scroll group relative flex items-start gap-4 overflow-hidden rounded-2xl border border-border/70 bg-white/85 p-5 shadow-sm backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
+                  className="animate-on-scroll group relative flex items-start gap-4 overflow-hidden rounded-2xl border border-border/70 bg-white/95 p-5 shadow-sm backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl"
                 >
                   <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 transition-opacity duration-500 group-hover:opacity-90", styles.glow)} />
                   <div className={cn("relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3", styles.iconWrap)}>
@@ -209,7 +218,7 @@ export function ContactContent() {
 
           {/* Form - right */}
           <div className="lg:col-span-3">
-            <div className="animate-on-scroll relative overflow-hidden rounded-2xl border border-border/70 bg-white/90 p-8 shadow-md backdrop-blur-sm">
+            <div className="animate-on-scroll relative overflow-hidden rounded-2xl border border-border/70 bg-white/95 p-8 shadow-md backdrop-blur-sm">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-transparent" />
               <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-primary/70 via-primary/40 to-primary/70" />
               {submitted ? (
@@ -374,7 +383,7 @@ export function ContactContent() {
         </div>
 
         {/* Map avec Google Maps iframe */}
-        <div className="mt-16 overflow-hidden rounded-2xl border border-border/70 bg-white/80 shadow-md backdrop-blur-sm">
+        <div className="mt-16 overflow-hidden rounded-2xl border border-border/70 bg-white/95 shadow-md backdrop-blur-sm">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d199.80932610909935!2d2.9864058231843993!3d36.74778999494874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzbCsDQ0JzUyLjEiTiAywrA1OScxMS44IkU!5e0!3m2!1sfr!2sdz!4v1770982457442!5m2!1sfr!2sdz"
             width="100%"

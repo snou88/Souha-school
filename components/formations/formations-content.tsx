@@ -41,88 +41,6 @@ interface Formation {
   student_count?: number
 }
 
-// Couleurs disponibles pour les cartes
-const cardColors = [
-  {
-    primary: "bg-blue-50",
-    secondary: "bg-blue-100",
-    text: "text-blue-600",
-    border: "border-blue-200",
-    shadow: "shadow-blue-100/50",
-    gradient: "from-blue-50 to-blue-100/50",
-    icon: "text-blue-500",
-    button: "bg-blue-50 hover:bg-blue-100 text-blue-600",
-    light: "bg-blue-500/5",
-    dot: "bg-blue-400",
-    hover: "hover:shadow-blue-200/50"
-  },
-  {
-    primary: "bg-red-50",
-    secondary: "bg-red-100",
-    text: "text-red-600",
-    border: "border-red-200",
-    shadow: "shadow-red-100/50",
-    gradient: "from-red-50 to-red-100/50",
-    icon: "text-red-500",
-    button: "bg-red-50 hover:bg-red-100 text-red-600",
-    light: "bg-red-500/5",
-    dot: "bg-red-400",
-    hover: "hover:shadow-red-200/50"
-  },
-  {
-    primary: "bg-amber-50",
-    secondary: "bg-amber-100",
-    text: "text-amber-600",
-    border: "border-amber-200",
-    shadow: "shadow-amber-100/50",
-    gradient: "from-amber-50 to-amber-100/50",
-    icon: "text-amber-500",
-    button: "bg-amber-50 hover:bg-amber-100 text-amber-600",
-    light: "bg-amber-500/5",
-    dot: "bg-amber-400",
-    hover: "hover:shadow-amber-200/50"
-  },
-  {
-    primary: "bg-purple-50",
-    secondary: "bg-purple-100",
-    text: "text-purple-600",
-    border: "border-purple-200",
-    shadow: "shadow-purple-100/50",
-    gradient: "from-purple-50 to-purple-100/50",
-    icon: "text-purple-500",
-    button: "bg-purple-50 hover:bg-purple-100 text-purple-600",
-    light: "bg-purple-500/5",
-    dot: "bg-purple-400",
-    hover: "hover:shadow-purple-200/50"
-  },
-  {
-    primary: "bg-emerald-50",
-    secondary: "bg-emerald-100",
-    text: "text-emerald-600",
-    border: "border-emerald-200",
-    shadow: "shadow-emerald-100/50",
-    gradient: "from-emerald-50 to-emerald-100/50",
-    icon: "text-emerald-500",
-    button: "bg-emerald-50 hover:bg-emerald-100 text-emerald-600",
-    light: "bg-emerald-500/5",
-    dot: "bg-emerald-400",
-    hover: "hover:shadow-emerald-200/50"
-  },
-  {
-    primary: "bg-amber-800/10",
-    secondary: "bg-amber-800/20",
-    text: "text-amber-800",
-    border: "border-amber-800/20",
-    shadow: "shadow-amber-800/10",
-    gradient: "from-amber-800/5 to-amber-800/10",
-    icon: "text-amber-700",
-    button: "bg-amber-800/10 hover:bg-amber-800/20 text-amber-800",
-    light: "bg-amber-800/5",
-    dot: "bg-amber-600",
-    hover: "hover:shadow-amber-800/20"
-  }
-]
-
 // Mapping des icônes
 const getIcon = (categoryName: string) => {
   const name = categoryName.toLowerCase()
@@ -140,30 +58,6 @@ const formatDescription = (description: string | null) => {
   return description.split('\n').filter(line => line.trim() !== '')
 }
 
-// Cercles statiques pour le background
-const staticCircles = [
-  { size: 42, top: 15, left: 10, color: 'bg-blue-400/25', delay: 0, duration: 14 },
-  { size: 18, top: 8, left: 85, color: 'bg-blue-600/10', delay: 2, duration: 10 },
-  { size: 31, top: 22, left: 30, color: 'bg-blue-500/30', delay: 1, duration: 8 },
-  { size: 33, top: 45, left: 75, color: 'bg-blue-400/30', delay: 3, duration: 12 },
-  { size: 50, top: 12, left: 55, color: 'bg-blue-300/20', delay: 4, duration: 16 },
-  { size: 24, top: 35, left: 20, color: 'bg-blue-400/25', delay: 0.5, duration: 11 },
-  { size: 41, top: 68, left: 40, color: 'bg-blue-300/40', delay: 2.5, duration: 13 },
-  { size: 54, top: 82, left: 15, color: 'bg-blue-500/20', delay: 1.5, duration: 15 },
-  { size: 29, top: 72, left: 90, color: 'bg-blue-400/30', delay: 3.5, duration: 9 },
-  { size: 37, top: 28, left: 70, color: 'bg-blue-300/20', delay: 0.8, duration: 14 },
-  { size: 46, top: 92, left: 25, color: 'bg-blue-400/30', delay: 2.2, duration: 12 },
-  { size: 22, top: 50, left: 45, color: 'bg-blue-500/30', delay: 4.1, duration: 10 },
-  { size: 39, top: 63, left: 60, color: 'bg-blue-600/15', delay: 1.2, duration: 13 },
-  { size: 51, top: 78, left: 80, color: 'bg-blue-400/25', delay: 3.8, duration: 11 },
-  { size: 27, top: 40, left: 95, color: 'bg-blue-300/20', delay: 0.3, duration: 9 },
-  { size: 35, top: 88, left: 35, color: 'bg-blue-500/20', delay: 2.7, duration: 14 },
-  { size: 43, top: 18, left: 48, color: 'bg-blue-400/30', delay: 1.8, duration: 12 },
-  { size: 20, top: 95, left: 68, color: 'bg-blue-300/40', delay: 4.5, duration: 8 },
-  { size: 48, top: 58, left: 12, color: 'bg-blue-400/25', delay: 0.9, duration: 15 },
-  { size: 32, top: 25, left: 82, color: 'bg-blue-600/10', delay: 3.2, duration: 11 }
-]
-
 // Composant principal
 export function FormationsContent() {
   const [formations, setFormations] = useState<Formation[]>([])
@@ -172,7 +66,19 @@ export function FormationsContent() {
   const [categories, setCategories] = useState<string[]>(["Toutes"])
   const [selectedFormation, setSelectedFormation] = useState<Formation | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const sectionRef = useRef<HTMLElement | null>(null)
+
+  // Détecter si c'est mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     setMounted(true)
@@ -205,7 +111,7 @@ export function FormationsContent() {
     }, 100)
 
     return () => observer.disconnect()
-  }, [loading, mounted, active]) // Ajout de active comme dépendance
+  }, [loading, mounted, active])
 
   const fetchFormations = async () => {
     try {
@@ -269,35 +175,19 @@ export function FormationsContent() {
     })
   }, [formations, active])
 
-  const getRandomColor = (index: number) => {
-    return cardColors[index % cardColors.length]
-  }
-
   if (loading) {
     return (
-      <section className="relative bg-gradient-to-b from-background to-secondary/20 py-24 overflow-hidden min-h-[60vh]">
-        {mounted && (
-          <div className="absolute inset-0 pointer-events-none">
-            {staticCircles.map((circle, index) => (
-              <div
-                key={index}
-                className={`absolute rounded-full ${circle.color} blur-sm`}
-                style={{
-                  width: `${circle.size}px`,
-                  height: `${circle.size}px`,
-                  top: `${circle.top}%`,
-                  left: `${circle.left}%`,
-                  animation: `float-circle ${circle.duration}s ease-in-out ${circle.delay}s infinite`,
-                  opacity: 0.4
-                }}
-              />
-            ))}
-          </div>
-        )}
-
+      <section 
+        ref={sectionRef}
+        className="relative -mt-px overflow-hidden bg-cover bg-no-repeat py-24 min-h-[60vh]"
+        style={{
+          backgroundImage: isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
+          backgroundPosition: isMobile ? "center top" : "center",
+        }}
+      >
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex min-h-[400px] items-center justify-center">
-            <div className="text-center">
+            <div className="text-center bg-white/80 backdrop-blur-sm rounded-lg p-8">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
               <p className="mt-4 text-sm text-muted-foreground">Chargement des formations...</p>
             </div>
@@ -309,37 +199,20 @@ export function FormationsContent() {
 
   return (
     <>
-      <section className="relative bg-gradient-to-b from-background to-secondary/20 py-24 overflow-hidden">
+      <section
+        ref={sectionRef}
+        className="relative -mt-px overflow-hidden bg-cover bg-no-repeat py-24"
+        style={{
+          backgroundImage: isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
+          backgroundPosition: isMobile ? "center top" : "center",
+        }}
+      >
+        {/* Overlay pour améliorer la lisibilité */}
+        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+        
         {/* Dégradé de transition */}
         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-white pointer-events-none z-10" />
-
-        {/* Petits cercles flottants */}
-        {mounted && (
-          <div className="absolute inset-0 pointer-events-none">
-            {staticCircles.map((circle, index) => (
-              <div
-                key={index}
-                className={`absolute rounded-full ${circle.color} blur-sm`}
-                style={{
-                  width: `${circle.size}px`,
-                  height: `${circle.size}px`,
-                  top: `${circle.top}%`,
-                  left: `${circle.left}%`,
-                  animation: `float-circle ${circle.duration}s ease-in-out ${circle.delay}s infinite`,
-                  opacity: 0.4
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Grands cercles */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -right-20 -top-20 h-[600px] w-[600px] rounded-full bg-blue-200/10 blur-3xl" />
-          <div className="absolute -left-20 top-40 h-[500px] w-[500px] rounded-full bg-purple-200/10 blur-3xl" />
-          <div className="absolute right-1/3 -bottom-20 h-[400px] w-[400px] rounded-full bg-amber-200/10 blur-3xl" />
-        </div>
 
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-20">
           {/* Header */}
@@ -351,10 +224,10 @@ export function FormationsContent() {
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse mr-2" />
               Catalogue 2026
             </Badge>
-            <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+            <h1 className="text-balance text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
               Nos formations
             </h1>
-            <p className="mt-6 text-pretty text-lg leading-relaxed text-muted-foreground max-w-2xl mx-auto">
+            <p className="mt-6 text-pretty text-lg leading-relaxed text-white/90 max-w-2xl mx-auto">
               Des programmes conçus pour votre réussite professionnelle
             </p>
           </div>
@@ -387,13 +260,12 @@ export function FormationsContent() {
           <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filtered.length === 0 ? (
               <div className="col-span-full py-12 text-center">
-                <p className="text-muted-foreground">Aucune formation disponible dans cette catégorie.</p>
+                <p className="text-white">Aucune formation disponible dans cette catégorie.</p>
               </div>
             ) : (
               filtered.map((formation, index) => {
                 const Icon = getIcon(formation.categories?.name || '')
                 const descriptionLines = formatDescription(formation.description)
-                const colors = getRandomColor(index)
 
                 return (
                   <div
@@ -401,35 +273,21 @@ export function FormationsContent() {
                     ref={(el) => { cardsRef.current[index] = el }}
                     className="group relative flex flex-col rounded-2xl border border-border bg-white/80 backdrop-blur-sm shadow-xl transition-all duration-700 hover:shadow-2xl hover:-translate-y-2 overflow-hidden cursor-pointer opacity-0 translate-y-10"
                     style={{
-                      boxShadow: `0 20px 40px -15px ${colors.shadow.replace('shadow-', '')}`,
                       transitionDelay: `${index * 100}ms`
                     }}
                     onClick={() => setSelectedFormation(formation)}
                   >
-                    {/* Bande de couleur */}
-                    <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${colors.gradient} animate-gradient-x`} />
-
-                    {/* Points décoratifs */}
-                    <div className="absolute top-3 left-3 flex gap-1">
-                      <span className={`h-2 w-2 rounded-full ${colors.dot} opacity-50`} />
-                      <span className={`h-2 w-2 rounded-full ${colors.dot} opacity-30`} />
-                      <span className={`h-2 w-2 rounded-full ${colors.dot} opacity-20`} />
-                    </div>
-
                     {/* Badge catégorie */}
                     <div className="absolute right-4 top-4 z-10">
-                      <Badge
-                        variant="secondary"
-                        className={`${colors.light} ${colors.text} border-0 backdrop-blur-sm shadow-sm`}
-                      >
+                      <Badge variant="secondary" className="border-0 bg-muted/80 text-muted-foreground shadow-sm backdrop-blur-sm">
                         {formation.categories?.name || "Formation"}
                       </Badge>
                     </div>
 
                     {/* Icône et titre */}
                     <div className="p-6 pb-4">
-                      <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-xl ${colors.primary} transition-all duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                        <Icon className={`h-7 w-7 ${colors.icon} transition-transform duration-500 group-hover:rotate-6`} />
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-muted transition-all duration-500 group-hover:scale-110 group-hover:rotate-3">
+                        <Icon className="h-7 w-7 text-primary transition-transform duration-500 group-hover:rotate-6" />
                       </div>
                       <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-300">
                         {formation.name}
@@ -442,13 +300,13 @@ export function FormationsContent() {
                         <ul className="space-y-2">
                           {descriptionLines.slice(0, 2).map((line, idx) => (
                             <li key={idx} className="flex items-start gap-2 text-sm">
-                              <CheckCircle className={`mt-0.5 h-4 w-4 flex-shrink-0 ${colors.icon}`} />
+                              <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
                               <span className="text-muted-foreground line-clamp-1">{line}</span>
                             </li>
                           ))}
                         </ul>
                         {descriptionLines.length > 2 && (
-                          <p className={`mt-2 text-xs font-medium ${colors.text}`}>
+                          <p className="mt-2 text-xs font-medium text-primary">
                             + {descriptionLines.length - 2} autres points...
                           </p>
                         )}
@@ -456,15 +314,15 @@ export function FormationsContent() {
                     )}
 
                     {/* Métriques */}
-                    <div className={`mt-6 grid grid-cols-2 gap-3 border-t border-border ${colors.primary} p-4`}>
+                    <div className="mt-6 grid grid-cols-2 gap-3 border-t border-border bg-muted/30 p-4">
                       <div className="flex items-center gap-2">
-                        <Clock className={`h-4 w-4 ${colors.icon}`} />
+                        <Clock className="h-4 w-4 text-primary" />
                         <span className="text-sm font-medium text-foreground">{formation.duration}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Users className={`h-4 w-4 ${colors.icon}`} />
+                        <Users className="h-4 w-4 text-primary" />
                         <span className="text-sm font-medium text-foreground">
-                          <span className="text-sm font-medium text-foreground">Inscriptions ouvertes</span>
+                          Inscriptions ouvertes
                         </span>
                       </div>
                     </div>
@@ -572,13 +430,6 @@ export function FormationsContent() {
       </Dialog>
 
       <style jsx>{`
-        @keyframes float-circle {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          25% { transform: translate(15px, -15px) rotate(5deg); }
-          50% { transform: translate(0, -25px) rotate(0deg); }
-          75% { transform: translate(-15px, -10px) rotate(-5deg); }
-        }
-
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
@@ -586,16 +437,6 @@ export function FormationsContent() {
         
         .animate-fade-in {
           animation: fade-in 0.6s ease-out forwards;
-        }
-
-        @keyframes gradient-x {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        
-        .animate-gradient-x {
-          background-size: 200% 200%;
-          animation: gradient-x 3s ease infinite;
         }
 
         .card-visible {

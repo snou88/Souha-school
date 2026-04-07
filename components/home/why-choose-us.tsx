@@ -54,8 +54,11 @@ export function WhyChooseUs() {
   useScrollAnimation()
 
   return (
-    <section className="bg-secondary py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section
+      className="relative overflow-hidden bg-cover bg-center bg-no-repeat py-24"
+    >
+      <div className="absolute inset-0 pointer-events-none bg-white/[0.06]" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center animate-on-scroll">
           <span className="text-sm font-semibold uppercase tracking-wider text-primary">
             {sltHomeContent.whyUs.eyebrow}

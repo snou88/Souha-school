@@ -8,7 +8,6 @@ import { HeroSection } from "@/components/home/hero-section"
 import { WhyChooseUs } from "@/components/home/why-choose-us"
 import { CtaBanner } from "@/components/home/cta-banner"
 import PartnersSection from "@/components/home/partners"
-import { LiquidCursorBlob } from "@/components/home/liquid-cursor-blob"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
@@ -199,7 +198,6 @@ export default function HomePage() {
     <>
       <Navbar />
       <main className="relative z-[2]">
-        <LiquidCursorBlob />
         <HeroSection />
 
         <section
@@ -211,7 +209,13 @@ export default function HomePage() {
             backgroundPosition: isMobile ? "center top" : "center",
           }}
         >
-          <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
+          {/* Dégradé en haut - fond vers transparent */}
+          <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-white via-white/90 via-10% to-transparent pointer-events-none z-10" />
+          
+          {/* Dégradé en bas - transparent vers fond */}
+          <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-white via-white/95 via-10% to-transparent pointer-events-none z-10" />
+
+          <div className="relative mx-auto max-w-7xl px-6 lg:px-8 z-20">
             <div className="mx-auto max-w-2xl text-center mb-12">
               <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-4 py-1.5 text-sm font-semibold text-primary">
                 <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />

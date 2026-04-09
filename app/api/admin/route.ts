@@ -120,7 +120,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json()
-    const { id, name, email } = body
+    const { id, name, email, password } = body
 
     if (!id) {
       return NextResponse.json({ 
@@ -160,14 +160,39 @@ export async function PUT(request: Request) {
       }
     }
 
+    const updateData: {
+      name?: string
+      email?: string
+      password_hash?: string
+      updated_at: string
+    } = {
+      updated_at: new Date().toISOString()
+    }
+
+    if (typeof name === 'string') {
+      updateData.name = name
+    }
+
+    if (typeof email === 'string') {
+      updateData.email = email
+    }
+
+    if (typeof password === 'string' && password.length > 0) {
+      if (password.length < 6) {
+        return NextResponse.json({
+          success: false,
+          error: "Le mot de passe doit contenir au moins 6 caractères."
+        }, { status: 400 })
+      }
+
+      const salt = await bcrypt.genSalt(10)
+      updateData.password_hash = await bcrypt.hash(password, salt)
+    }
+
     // Mettre à jour l'admin
     const { data, error } = await supabaseAdmin
       .from('admin')  // Changé de 'admins' à 'admin'
-      .update({ 
-        name, 
-        email,
-        updated_at: new Date().toISOString() 
-      })
+      .update(updateData)
       .eq('id', id)
       .select('id, name, email, role, created_at')
       .single()

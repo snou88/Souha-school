@@ -78,9 +78,9 @@ export function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps) {
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
             {!collapsed && (
-              <span className="text-base font-bold tracking-tight text-gray-900 whitespace-nowrap">
-                <img src={logo.src} alt="SLT Logo" className="h-8 w-auto object-contain" />
-              </span>
+              <a href="https://souha-school.vercel.app/"><span className="text-base font-bold tracking-tight text-gray-900 whitespace-nowrap">
+                 <img src={logo.src} alt="SLT Logo" className="h-8 w-auto object-contain" />
+              </span></a>
             )}
           </Link>
           {!collapsed && (

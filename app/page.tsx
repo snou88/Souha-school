@@ -203,11 +203,6 @@ export default function HomePage() {
         <section
           ref={sectionRef}
           className="relative -mt-px overflow-hidden bg-cover bg-no-repeat py-16"
-          style={{
-            backgroundImage:
-              isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
-            backgroundPosition: isMobile ? "center top" : "center",
-          }}
         >
           {/* Dégradé en haut - fond vers transparent */}
           <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-white via-white/90 via-10% to-transparent pointer-events-none z-10" />

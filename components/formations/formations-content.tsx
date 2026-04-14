@@ -180,10 +180,6 @@ export function FormationsContent() {
       <section 
         ref={sectionRef}
         className="relative -mt-px overflow-hidden bg-cover bg-no-repeat py-24 min-h-[60vh]"
-        style={{
-          backgroundImage: isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
-          backgroundPosition: isMobile ? "center top" : "center",
-        }}
       >
         <div className="relative mx-auto max-w-7xl px-6 lg:px-8">
           <div className="flex min-h-[400px] items-center justify-center">

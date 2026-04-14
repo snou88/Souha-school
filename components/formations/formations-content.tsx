@@ -198,10 +198,6 @@ export function FormationsContent() {
       <section
         ref={sectionRef}
         className="relative -mt-px overflow-hidden bg-cover bg-no-repeat py-24"
-        style={{
-          backgroundImage: isMobile ? "url('/image/background-tel1.png')" : "url('/image/background1.png')",
-          backgroundPosition: isMobile ? "center top" : "center",
-        }}
       >
         {/* Overlay pour améliorer la lisibilité */}
         <div className="absolute inset-0 pointer-events-none" />
